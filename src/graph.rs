@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use ndarray::{Array2};
 
 use crate::io;
@@ -36,7 +37,7 @@ impl<T> Edge<T>
 }
 
 #[derive(Debug, Clone)]
-struct Graph<T> 
+pub struct Graph<T> 
     where T: Clone + Copy + PartialEq + PartialOrd
 {
     edges: Vec<Edge<T>>,
@@ -46,7 +47,7 @@ struct Graph<T>
 impl<T> Graph<T>
     where T: Clone + Copy + PartialEq + PartialOrd
 {
-    fn new(nodes: Vec<String>) -> Self {
+    pub fn new(nodes: Vec<String>) -> Self {
         Self {
             edges: Vec::new(),
             nodes: nodes
@@ -61,11 +62,23 @@ impl<T> Graph<T>
         self.nodes.len()
     }
 
+    pub fn nodes(&self) -> &Vec<String> {
+        &self.nodes
+    }
+
+    pub fn edges(&self) -> &Vec<Edge<T>> {
+        &self.edges
+    }
+}
+
+impl<T> Graph<T>
+    where T: Clone + Copy + Ord + PartialEq + PartialOrd + Display
+{
     fn construct_hrr_network(
         &mut self,
         corr: Array2<f64>,
-        rank: Array2<usize>,
-        hrr_cutoff: usize,
+        rank: Array2<T>,
+        hrr_cutoff: T,
         pcc_cutoff: Option<f64>,
     ) {
         for i in 0..self.size() {

@@ -1,4 +1,4 @@
-pub fn hrr(a: usize, b: usize) -> usize {
+pub fn hrr<T: Ord>(a: T, b: T) -> T {
     std::cmp::max(a, b)
 }
 
