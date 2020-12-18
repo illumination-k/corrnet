@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{fmt::Display, path::Path};
 use std::io::{BufRead, BufReader};
 use std::collections::HashMap;
 
@@ -85,4 +85,21 @@ impl CsvRecord {
             rank
         }
     }
+}
+
+pub fn graph_to_csv<P, T>(
+    outpath: P, 
+    graph: graph::Graph<T>
+) -> Result<()>
+    where P: AsRef<Path>, T: Copy + Clone + Display + PartialOrd + PartialEq
+{
+    let mut wtr = Writer::from_path(outpath.as_ref())?;
+
+    for edge in graph.edges().iter() {
+        wtr.serialize(edge.to_record(graph.nodes()))?;
+    }
+
+    wtr.flush()?;    
+
+    Ok(())
 }
