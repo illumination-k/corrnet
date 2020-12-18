@@ -413,6 +413,7 @@ dependencies = [
  "log",
  "ndarray 0.14.0",
  "ndarray-stats",
+ "num-traits",
  "ordered-float 2.0.1",
  "pretty_env_logger",
  "serde",

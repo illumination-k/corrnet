@@ -5,26 +5,23 @@ extern crate pretty_env_logger;
 extern crate ndarray;
 extern crate ndarray_stats;
 extern crate chrono;
+extern crate num_traits;
 
 #[macro_use]
 extern crate log;
 
-#[macro_use]
 extern crate serde;
 
 #[macro_use]
 extern crate serde_derive;
 
 use std::env::set_var;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use chrono::{Local};
 
 use ndarray::{ArrayBase, Array2};
 use ndarray_stats::*;
-
-use ordered_float::OrderedFloat;
-use superslice::*;
 
 use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
@@ -32,7 +29,7 @@ use anyhow::Result;
 mod io;
 mod graph;
 mod codon;
-mod cosmix;
+mod similarity;
 mod rank;
 
 #[derive(Debug, StructOpt)]
@@ -95,105 +92,32 @@ fn main() -> Result<()> {
 
     // calc rank matrix
     info!("calculate rank matrix... : {}", Local::now());
-    let mut rank_vec: Vec<usize> = vec![];
-    for row in corr.outer_iter() {
-        // sort and bitsect
-        let mut sorted_vec: Vec<OrderedFloat<f64>> = row.to_vec().into_iter().map(|x| OrderedFloat::from(f64::abs(x))).collect();
-        sorted_vec.sort();
+    // let mut rank_vec: Vec<usize> = vec![];
+    // for row in corr.outer_iter() {
+    //     // sort and bitsect
+    //     let mut sorted_vec: Vec<OrderedFloat<f64>> = row.to_vec().into_iter().map(|x| OrderedFloat::from(f64::abs(x))).collect();
+    //     sorted_vec.sort();
 
-        for vv in row.to_vec().iter() {
-            let rank = sorted_vec.len() - sorted_vec.lower_bound(&OrderedFloat::from(*vv)) - 1;
-            rank_vec.push(rank)
-        }
-    }
+    //     for vv in row.to_vec().iter() {
+    //         let rank = sorted_vec.len() - sorted_vec.lower_bound(&OrderedFloat::from(*vv)) - 1;
+    //         rank_vec.push(rank)
+    //     }
+    // }
 
     let array_size = index.len();
-    let rank_arr: Array2<usize>  = ArrayBase::from_shape_vec((array_size, array_size), rank_vec)?;
-
+    // let rank_arr: Array2<usize>  = ArrayBase::from_shape_vec((array_size, array_size), rank_vec)?;
+    let rank_arr: Array2<usize> = rank::construct_rank_matrix(&corr, array_size)?;
     // construct hrr based network
     info!("construct hrr based network... : {}", Local::now());
     let hrr_cutoff: usize = *(&opt.hrr_cutoff);
     let pcc_cutoff: Option<f64> = *(&opt.pcc_cutoff);
-    let mut graph = Graph::new(index);
-
-    for i in 0..array_size {
-        for j in i..array_size {
-            if i == j { continue; }
-            if let Some(pcc_cutoff) = pcc_cutoff {
-                if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
-            }
-            // highest reciprocal rank: max(rank(A, B), rank(B, A))
-            let hrr = std::cmp::max(rank_arr[[i, j]], rank_arr[[j, i]]);
-
-            if hrr > hrr_cutoff { continue; }
-            graph.push(Node::new(i, j, corr[[i, j]], hrr));
-        }
-    }
+    let mut graph: graph::Graph<usize> = graph::Graph::new(index);
+    graph.construct_hrr_network(corr, rank_arr, hrr_cutoff, pcc_cutoff);
 
     // calc hcca clusters
 
     info!("Write csv...: {}", Local::now());
-    graph_to_csv("ignore/graph.csv", graph)?;
+    io::graph_to_csv("ignore/graph.csv", graph)?;
     // calc codon usage
     Ok(())
-}
-
-fn graph_to_csv<P: AsRef<Path>>(outpath: P, graph: Graph) -> Result<()> {
-    let mut wtr = csv::Writer::from_path(outpath.as_ref())?;
-    wtr.write_record(&["query", "target", "corr", "hrr"])?;
-
-    // use serializer ?
-    for node in graph.nodes.iter() {
-        wtr.write_record(&[node.query_name(&graph.index), node.target_name(&graph.index), node.corr.to_string(), node.hrr.to_string()])?;
-    }
-
-    wtr.flush()?;
-
-    Ok(())
-}
-
-#[derive(Debug, Clone, Copy)]
-struct Node {
-    query: usize,
-    target: usize,
-    corr: f64,
-    hrr: usize,
-}
-
-impl Node {
-    fn new(query: usize, target: usize, corr: f64, hrr: usize) -> Self {
-        Self {
-            query,
-            target,
-            corr,
-            hrr
-        }
-    }
-
-    fn query_name(&self, index: &Vec<String>) -> String {
-        index[self.query].clone()
-    }
-
-    fn target_name(&self, index: &Vec<String>) -> String {
-        index[self.target].clone()
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Graph {
-    nodes: Vec<Node>,
-    index: Vec<String>,
-}
-
-impl Graph {
-    fn new(index: Vec<String>) -> Self {
-        Self {
-            nodes: Vec::new(),
-            index: index
-        }
-    }
-
-    fn push(&mut self, node: Node) {
-        self.nodes.push(node)
-    }
 }

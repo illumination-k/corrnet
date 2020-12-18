@@ -74,7 +74,7 @@ impl<T> Graph<T>
 impl<T> Graph<T>
     where T: Clone + Copy + Ord + PartialEq + PartialOrd + Display
 {
-    fn construct_hrr_network(
+    pub fn construct_hrr_network(
         &mut self,
         corr: Array2<f64>,
         rank: Array2<T>,
@@ -83,6 +83,7 @@ impl<T> Graph<T>
     ) {
         for i in 0..self.size() {
             for j in i..self.size() {
+                if i == j { continue; }
                 if let Some(pcc_cutoff) = pcc_cutoff {
                     if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
                 }
@@ -91,6 +92,29 @@ impl<T> Graph<T>
 
                 if hrr > hrr_cutoff { continue; }
                 self.push(Edge::new(i, j, corr[[i, j]], hrr))
+            }
+        }
+    }
+}
+
+impl<T> Graph<T>
+    where T: num_traits::Float + Display
+{
+    pub fn construct_mr_network<R: num_traits::NumCast + Copy>(
+        &mut self,
+        corr: Array2<f64>,
+        rank: Array2<R>,
+        pcc_cutoff: Option<f64>
+    ) {
+        for i in 0..self.size() {
+            for j in i..self.size() {
+                if i == j { continue; }
+                if let Some(pcc_cutoff) = pcc_cutoff {
+                    if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
+                }
+                // construct network with rank::mr
+                let mr = rank::mr(T::from(rank[[i, j]]).unwrap(), T::from(rank[[j, i]]).unwrap());
+                self.push(Edge::new(i, j, corr[[i, j]], mr));
             }
         }
     }
