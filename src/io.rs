@@ -9,6 +9,8 @@ use csv::{Reader, Writer};
 use anyhow::Result;
 use ndarray::{Axis, ArrayBase, Array1, Array2, aview0};
 
+use crate::graph;
+
 pub fn read_exp_csv<P: AsRef<Path>>(
     input: P, 
     index: &mut Vec<String>, 
@@ -64,4 +66,23 @@ pub fn read_fasta<P: AsRef<Path>>(fasta: P) -> Result<HashMap<String, String>> {
     }
 
     Ok(map)
+}
+
+#[derive(Debug, Serialize)]
+pub struct CsvRecord {
+    gene_1: String,
+    gene_2: String,
+    corr: f64,
+    rank: String,
+}
+
+impl CsvRecord {
+    pub fn new(gene_1: String, gene_2: String, corr: f64, rank: String) -> Self {
+        Self {
+            gene_1,
+            gene_2,
+            corr,
+            rank
+        }
+    }
 }

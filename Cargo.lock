@@ -415,6 +415,8 @@ dependencies = [
  "ndarray-stats",
  "ordered-float 2.0.1",
  "pretty_env_logger",
+ "serde",
+ "serde_derive",
  "structopt",
  "superslice",
 ]
