@@ -9,6 +9,9 @@ extern crate chrono;
 #[macro_use]
 extern crate log;
 
+#[macro_use]
+extern crate serde;
+
 use std::env::set_var;
 use std::path::{Path, PathBuf};
 
@@ -26,6 +29,7 @@ use anyhow::Result;
 mod io;
 mod graph;
 mod codon;
+mod cosmix;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "hrr_corrnet")]
