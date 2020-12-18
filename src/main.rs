@@ -30,6 +30,7 @@ mod io;
 mod graph;
 mod codon;
 mod cosmix;
+mod rank;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "hrr_corrnet")]
