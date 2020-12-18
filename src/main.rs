@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 
 use chrono::{Local};
 
-use ndarray::{ArrayBase, Axis, Array1, Array2, aview0};
+use ndarray::{ArrayBase, Array2};
 use ndarray_stats::*;
 
 use ordered_float::OrderedFloat;
@@ -22,6 +22,10 @@ use superslice::*;
 
 use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
+
+mod io;
+mod graph;
+mod codon;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "hrr_corrnet")]
@@ -68,36 +72,12 @@ fn main() -> Result<()> {
     };
     pretty_env_logger::init();
 
-    let mut rdr = csv::Reader::from_path(&opt.input)?;
     info!("--- start read {}: {} ---", &opt.input.as_path().to_str().unwrap(), Local::now());
 
     // read csv and make ndarray::Array2
     let mut index: Vec<String> = vec![];
-    let mut vec: Vec<f64> = vec![];
-
-    let mut shape = (0, 0);
-    for _r in rdr.records() {
-        let r = _r?;
-        
-        // skip index
-        let exp_vec: Vec<f64> = r.into_iter()
-            .skip(1)
-            .map(|x| x.parse::<f64>().expect("cannot convert to f64"))
-            .collect();
-        
-        // Whine std == 0, continue. Maybe use approx for abs_diff_eq
-        let exp_arr: Array1<f64> = ArrayBase::from(exp_vec.clone());
-        if exp_arr.std_axis(Axis(0), 1.0)  == aview0(&0.) { continue; }
-
-        index.push(r[0].to_string());
-        vec.extend(exp_vec);
-        shape.1 = r.len()-1;
-        shape.0 += 1;
-        // debug!("{:?}", &r)
-    }
-    info!("shape: {:?}", shape);
-    info!("caluclate pearson correlation... : {}", Local::now());
-    let arr: Array2<f64> = ArrayBase::from_shape_vec(shape, vec)?;
+    
+    let arr = io::read_exp_csv(&opt.input, &mut index)?;
 
     // calc correlation
     let corr = arr.pearson_correlation()?;
@@ -134,12 +114,10 @@ fn main() -> Result<()> {
             if let Some(pcc_cutoff) = pcc_cutoff {
                 if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
             }
-            // if std::cmp::min(rank_arr[[i, j]], rank_arr[[j, i]]) > hrr_cutoff { continue; }
             // highest reciprocal rank: max(rank(A, B), rank(B, A))
             let hrr = std::cmp::max(rank_arr[[i, j]], rank_arr[[j, i]]);
 
             if hrr > hrr_cutoff { continue; }
-            // println!("query: {} target: {} corr: {} hrr: {}", &graph.index[i], &graph.index[j], corr[[i, j]], hrr);
             graph.push(Node::new(i, j, corr[[i, j]], hrr));
         }
     }
