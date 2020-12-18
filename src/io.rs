@@ -1,4 +1,4 @@
-use std::{fmt::Display, path::Path};
+use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
 use std::collections::HashMap;
 
@@ -42,6 +42,20 @@ pub fn read_exp_csv<P: AsRef<Path>>(
     Ok(ArrayBase::from_shape_vec(shape, vec)?)
 }
 
+pub fn read_graph_csv<P, T>(p: P) -> Result<graph::Graph<T>> 
+    where P: AsRef<Path>, T: Clone + Copy + Debug + FromStr + Display, <T as FromStr>::Err: std::fmt::Debug
+{
+    let mut rdr = Reader::from_path(p)?;
+    let mut records: Vec<CsvRecord> = vec![];
+
+    for _r in rdr.deserialize() {
+        let r: CsvRecord = _r?;
+        records.push(r)
+    }
+
+    Ok(graph::Graph::from_records(&records))
+}
+
 fn open_with_gz<P: AsRef<Path>>(p: P) -> Result<Box<dyn BufRead>> {
     let r = std::fs::File::open(p.as_ref())?;
     let ext = p.as_ref().extension();
@@ -68,7 +82,7 @@ pub fn read_fasta<P: AsRef<Path>>(fasta: P) -> Result<HashMap<String, String>> {
     Ok(map)
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CsvRecord {
     gene_1: String,
     gene_2: String,
@@ -85,13 +99,27 @@ impl CsvRecord {
             rank
         }
     }
+
+    pub fn genes(&self) -> (String, String) {
+        (self.gene_1.clone(), self.gene_2.clone())
+    }
+
+    pub fn corr(&self) -> f64 {
+        self.corr
+    }
+
+    pub fn rank<T: FromStr + Debug>(&self) -> T
+        where <T as FromStr>::Err: std::fmt::Debug
+    {
+        self.rank.parse().unwrap()
+    }
 }
 
 pub fn graph_to_csv<P, T>(
     outpath: P, 
     graph: graph::Graph<T>
 ) -> Result<()>
-    where P: AsRef<Path>, T: Copy + Clone + Display + PartialOrd + PartialEq
+    where P: AsRef<Path>, T: Copy + Clone + Display + PartialOrd + PartialEq + FromStr
 {
     let mut wtr = Writer::from_path(outpath.as_ref())?;
 

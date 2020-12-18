@@ -20,7 +20,7 @@ use std::path::PathBuf;
 
 use chrono::{Local};
 
-use ndarray::{ArrayBase, Array2};
+use ndarray::Array2;
 use ndarray_stats::*;
 
 use structopt::{clap, StructOpt, clap::arg_enum};
@@ -92,20 +92,7 @@ fn main() -> Result<()> {
 
     // calc rank matrix
     info!("calculate rank matrix... : {}", Local::now());
-    // let mut rank_vec: Vec<usize> = vec![];
-    // for row in corr.outer_iter() {
-    //     // sort and bitsect
-    //     let mut sorted_vec: Vec<OrderedFloat<f64>> = row.to_vec().into_iter().map(|x| OrderedFloat::from(f64::abs(x))).collect();
-    //     sorted_vec.sort();
-
-    //     for vv in row.to_vec().iter() {
-    //         let rank = sorted_vec.len() - sorted_vec.lower_bound(&OrderedFloat::from(*vv)) - 1;
-    //         rank_vec.push(rank)
-    //     }
-    // }
-
     let array_size = index.len();
-    // let rank_arr: Array2<usize>  = ArrayBase::from_shape_vec((array_size, array_size), rank_vec)?;
     let rank_arr: Array2<usize> = rank::construct_rank_matrix(&corr, array_size)?;
     // construct hrr based network
     info!("construct hrr based network... : {}", Local::now());

@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::{Display, Debug}, str::FromStr, vec};
 use ndarray::{Array2};
 
 use crate::io;
@@ -6,7 +6,7 @@ use crate::rank;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Edge<T> 
-    where T: Clone + Copy + PartialEq + PartialOrd
+    where T: Clone + Copy
 {
     node_1: usize,
     node_2: usize,
@@ -15,7 +15,7 @@ pub struct Edge<T>
 }
 
 impl<T> Edge<T> 
-    where T: Clone + Copy + PartialEq + PartialOrd + ToString
+    where T: Clone + Copy + ToString
 {
     pub fn new(node_1: usize, node_2: usize, corr: f64, rank: T) -> Self {
         Self {
@@ -38,14 +38,14 @@ impl<T> Edge<T>
 
 #[derive(Debug, Clone)]
 pub struct Graph<T> 
-    where T: Clone + Copy + PartialEq + PartialOrd
+    where T: Clone + Copy
 {
     edges: Vec<Edge<T>>,
     nodes: Vec<String>,
 }
 
 impl<T> Graph<T>
-    where T: Clone + Copy + PartialEq + PartialOrd
+    where T: Clone + Copy
 {
     pub fn new(nodes: Vec<String>) -> Self {
         Self {
@@ -72,7 +72,37 @@ impl<T> Graph<T>
 }
 
 impl<T> Graph<T>
-    where T: Clone + Copy + Ord + PartialEq + PartialOrd + Display
+    where T: Clone + Copy + FromStr + Debug + Display
+{
+    pub fn from_records(records: &Vec<io::CsvRecord>) -> Self
+        where <T as FromStr>::Err: std::fmt::Debug
+    {
+        let mut nodes: Vec<String> = vec![];
+        let mut edges: Vec<Edge<T>> = vec![];
+
+        let mut cnt = 0;
+        let mut map: HashMap<String, usize> = HashMap::new();
+
+        for r in records.iter() {
+            let (gene_1, gene_2) = r.genes();
+            let corr = r.corr();
+            let rank = r.rank::<T>();
+
+            let node_1 = get_node_index(&gene_1, &mut nodes, &mut map, &mut cnt);
+            let node_2 = get_node_index(&gene_2, &mut nodes, &mut map, &mut cnt);
+            edges.push(Edge::new(node_1, node_2, corr, rank));
+        }
+
+        Self {
+            edges,
+            nodes
+        }
+    }
+}
+
+
+impl<T> Graph<T>
+    where T: Clone + Copy + Ord + Display
 {
     pub fn construct_hrr_network(
         &mut self,
@@ -120,3 +150,18 @@ impl<T> Graph<T>
     }
 }
 
+fn get_node_index(
+    node_name: &String,
+    nodes: &mut Vec<String>, 
+    map: &mut HashMap<String, usize>,
+    cnt: &mut usize
+) -> usize {
+    if map.contains_key(node_name) { return *map.get(node_name).unwrap() }
+
+    let idx = *cnt;
+    map.entry(node_name.to_owned()).or_insert(idx);
+    nodes.push(node_name.to_owned());
+    *cnt += 1;
+
+    idx
+}
