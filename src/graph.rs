@@ -1,6 +1,7 @@
-use io::CsvRecord;
+use ndarray::{Array2};
 
 use crate::io;
+use crate::rank;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Edge<T> 
@@ -54,6 +55,31 @@ impl<T> Graph<T>
 
     fn push(&mut self, edge: Edge<T>) {
         self.edges.push(edge)
+    }
+
+    fn size(&self) -> usize {
+        self.nodes.len()
+    }
+
+    fn construct_hrr_network(
+        &mut self,
+        corr: Array2<f64>,
+        rank: Array2<usize>,
+        hrr_cutoff: usize,
+        pcc_cutoff: Option<f64>,
+    ) {
+        for i in 0..self.size() {
+            for j in i..self.size() {
+                if let Some(pcc_cutoff) = pcc_cutoff {
+                    if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
+                }
+
+                let hrr = rank::hrr(rank[[i, j]], rank[[j, i]]);
+
+                if hrr > hrr_cutoff { continue; }
+                self.push(Edge::new(i, j, corr[[i, j]], hrr))
+            }
+        }
     }
 }
 
