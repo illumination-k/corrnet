@@ -4,6 +4,42 @@ use ndarray::{Array2};
 use crate::io;
 use crate::rank;
 
+#[derive(Debug, Clone)]
+pub struct Node<T>
+    where T: Clone + Copy
+{
+    node_name: String,
+    edges: Vec<Edge<T>>,
+}
+
+impl<T> Node<T>
+    where T: Clone + Copy
+{
+    pub fn new(node_name: String) -> Self {
+        Self {
+            node_name: node_name,
+            edges: Vec::new()
+        }
+    }
+
+    pub fn push(&mut self, edge: Edge<T>) {
+        self.edges.push(edge)
+    }
+
+    pub fn edges(&self) -> Vec<Edge<T>> {
+        self.edges.clone()
+    }
+}
+
+impl<T> ToString for Node<T>
+    where T: Clone + Copy
+{
+    fn to_string(&self) -> String {
+        self.node_name.clone()
+    }
+}
+
+
 #[derive(Debug, Clone, Copy)]
 pub struct Edge<T> 
     where T: Clone + Copy
@@ -15,7 +51,7 @@ pub struct Edge<T>
 }
 
 impl<T> Edge<T> 
-    where T: Clone + Copy + ToString
+    where T: Clone + Copy
 {
     pub fn new(node_1: usize, node_2: usize, corr: f64, rank: T) -> Self {
         Self {
@@ -26,11 +62,23 @@ impl<T> Edge<T>
         }
     }
 
-    pub fn node_names(&self, nodes: &Vec<String>) -> (String, String) {
-        (nodes[self.node_1].clone(), nodes[self.node_2].clone())
+    pub fn query(&self) -> usize {
+        self.node_1
     }
 
-    pub fn to_record(&self, nodes: &Vec<String>) -> io::CsvRecord {
+    pub fn target(&self) -> usize {
+        self.node_2
+    }
+
+    pub fn node_names<S: ToString>(&self, nodes: &Vec<S>) -> (String, String) {
+        (nodes[self.node_1].to_string(), nodes[self.node_2].to_string())
+    }
+}
+
+impl<T> Edge<T>
+    where T: Clone + Copy + ToString
+{
+    pub fn to_record<S: ToString>(&self, nodes: &Vec<S>) -> io::CsvRecord {
         let (node_1_name, node_2_name) = self.node_names(nodes);
         io::CsvRecord::new(node_1_name, node_2_name, self.corr, self.rank.to_string())
     }
@@ -40,65 +88,72 @@ impl<T> Edge<T>
 pub struct Graph<T> 
     where T: Clone + Copy
 {
-    edges: Vec<Edge<T>>,
-    nodes: Vec<String>,
+    // edges: Vec<Edge<T>>,
+    nodes: Vec<Node<T>>,
 }
 
 impl<T> Graph<T>
     where T: Clone + Copy
 {
-    pub fn new(nodes: Vec<String>) -> Self {
+    pub fn new(nodes: &Vec<String>) -> Self {
         Self {
-            edges: Vec::new(),
-            nodes: nodes
+            // edges: Vec::new(),
+            nodes: nodes.iter().map(|x| Node::new(x.clone())).collect()
         }
     }
 
     fn push(&mut self, edge: Edge<T>) {
-        self.edges.push(edge)
+        let query = edge.query();
+        self.nodes[query].push(edge);
     }
 
     fn size(&self) -> usize {
         self.nodes.len()
     }
 
-    pub fn nodes(&self) -> &Vec<String> {
+    pub fn nodes(&self) -> &Vec<Node<T>> {
         &self.nodes
     }
 
-    pub fn edges(&self) -> &Vec<Edge<T>> {
-        &self.edges
+    pub fn edges(&self) -> Vec<Edge<T>> {
+        let mut edges = vec![];
+
+        for n in self.nodes() {
+            edges.extend(n.edges());
+        }
+
+        return edges
     }
 }
 
-impl<T> Graph<T>
-    where T: Clone + Copy + FromStr + Debug + Display
-{
-    pub fn from_records(records: &Vec<io::CsvRecord>) -> Self
-        where <T as FromStr>::Err: std::fmt::Debug
-    {
-        let mut nodes: Vec<String> = vec![];
-        let mut edges: Vec<Edge<T>> = vec![];
+// impl<T> Graph<T>
+//     where T: Clone + Copy + FromStr + Debug + Display
+// {
+//     pub fn from_records(records: &Vec<io::CsvRecord>) -> Self
+//         where <T as FromStr>::Err: std::fmt::Debug
+//     {
+//         let mut nodes: Vec<String> = vec![];
+//         let mut edges: Vec<Edge<T>> = vec![];
 
-        let mut cnt = 0;
-        let mut map: HashMap<String, usize> = HashMap::new();
+//         let mut cnt = 0;
+//         let mut map: HashMap<String, usize> = HashMap::new();
 
-        for r in records.iter() {
-            let (gene_1, gene_2) = r.genes();
-            let corr = r.corr();
-            let rank = r.rank::<T>();
+//         for r in records.iter() {
+//             let (gene_1, gene_2) = r.genes();
+//             let corr = r.corr();
+//             let rank = r.rank::<T>();
 
-            let node_1 = get_node_index(&gene_1, &mut nodes, &mut map, &mut cnt);
-            let node_2 = get_node_index(&gene_2, &mut nodes, &mut map, &mut cnt);
-            edges.push(Edge::new(node_1, node_2, corr, rank));
-        }
+//             let node_1 = get_node_index(&gene_1, &mut nodes, &mut map, &mut cnt);
+//             let node_2 = get_node_index(&gene_2, &mut nodes, &mut map, &mut cnt);
+//             edges.push(Edge::new(node_1, node_2, corr, rank));
+//         }
 
-        Self {
-            edges,
-            nodes
-        }
-    }
-}
+//         Self {
+//             edges,
+//             nodes
+//         }
+//     }
+// }
 
 
 impl<T> Graph<T>
