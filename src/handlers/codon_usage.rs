@@ -46,7 +46,7 @@ pub fn parse_args(
         let corr_ranked_vec: Vec<String> = corr_ranked.iter().map(|x| x.0.to_owned()).collect();
         let mut codon_ranked_vec: Vec<String> = vec!["".to_string(); index.len() - 1];
 
-        for j in 0..index.len()-1 {
+        for j in 0..index.len() {
             let rank = codon_rank[[i, j]];
             if rank == 0 { continue; }
             codon_ranked_vec[rank-1] = index[j].clone();
