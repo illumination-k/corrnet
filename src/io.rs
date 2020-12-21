@@ -1,6 +1,6 @@
 use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use flate2::read::MultiGzDecoder;
 
@@ -54,6 +54,19 @@ pub fn read_exp_csv<P: AsRef<Path>>(
 
 //     Ok(graph::Graph::from_records(&records))
 // }
+
+pub fn read_gene_list<P: AsRef<Path>>(p: &P) -> Result<HashSet<String>> {
+    let mut rdr = Reader::from_path(p)?;
+
+    let mut res: HashSet<String> = HashSet::new();
+
+    for _r in rdr.records() {
+        let r = _r?;
+        res.insert(r.into_iter().nth(0).unwrap().to_string());
+    }
+
+    Ok(res)
+}
 
 fn open_with_gz<P: AsRef<Path>>(p: P) -> Result<Box<dyn BufRead>> {
     let r = std::fs::File::open(p.as_ref())?;

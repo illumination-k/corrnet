@@ -163,19 +163,21 @@ impl<T> Graph<T>
         &mut self,
         corr: Array2<f64>,
         rank: Array2<T>,
-        hrr_cutoff: T,
-        pcc_cutoff: Option<f64>,
+        rank_cutoff: Option<&T>,
+        pcc_cutoff: Option<&f64>,
     ) {
         for i in 0..self.size() {
             for j in i..self.size() {
                 if i == j { continue; }
                 if let Some(pcc_cutoff) = pcc_cutoff {
-                    if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
+                    if f64::abs(corr[[i, j]]) < *pcc_cutoff { continue; }
                 }
 
                 let hrr = rank::hrr(rank[[i, j]], rank[[j, i]]);
 
-                if hrr > hrr_cutoff { continue; }
+                if let Some(rank_cutoff) = rank_cutoff {
+                    if hrr > *rank_cutoff { continue; }
+                }
                 self.push(Edge::new(i, j, corr[[i, j]], hrr))
             }
         }
@@ -189,16 +191,22 @@ impl<T> Graph<T>
         &mut self,
         corr: Array2<f64>,
         rank: Array2<R>,
-        pcc_cutoff: Option<f64>
+        rank_cutoff: Option<&T>,
+        pcc_cutoff: Option<&f64>,
     ) {
         for i in 0..self.size() {
             for j in i..self.size() {
                 if i == j { continue; }
-                if let Some(pcc_cutoff) = pcc_cutoff {
-                    if f64::abs(corr[[i, j]]) < pcc_cutoff { continue; }
-                }
                 // construct network with rank::mr
+                if let Some(pcc_cutoff) = pcc_cutoff {
+                    if f64::abs(corr[[i, j]]) < *pcc_cutoff { continue; }
+                }
                 let mr = rank::mr(T::from(rank[[i, j]]).unwrap(), T::from(rank[[j, i]]).unwrap());
+                
+                if let Some(rank_cutoff) = rank_cutoff {
+                    if mr > *rank_cutoff { continue; }
+                }
+                
                 self.push(Edge::new(i, j, corr[[i, j]], mr));
             }
         }
