@@ -1,6 +1,6 @@
 use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
-use std::collections::{HashMap, HashSet, BTreeMap};
+use std::collections::HashSet;
 
 use flate2::read::MultiGzDecoder;
 
