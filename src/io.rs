@@ -1,6 +1,6 @@
 use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, BTreeMap};
 
 use flate2::read::MultiGzDecoder;
 
@@ -82,16 +82,18 @@ fn open_with_gz<P: AsRef<Path>>(p: P) -> Result<Box<dyn BufRead>> {
     }
 }
 
-pub fn read_fasta<P: AsRef<Path>>(fasta: P) -> Result<HashMap<String, String>> {
-    let mut map: HashMap<String, String> = HashMap::new();
+pub fn read_fasta<P: AsRef<Path>>(fasta: P) -> Result<(Vec<String>, Vec<String>)> {
+    let mut index = vec![];
+    let mut seqs = vec![];
     let rdr = bio::io::fasta::Reader::new(open_with_gz(fasta)?);
     
     for _r in rdr.records() {
         let r = _r?;
-        map.entry(r.id().to_string()).or_insert(String::from_utf8(r.seq().to_vec())?);
+        index.push(r.id().to_string());
+        seqs.push(String::from_utf8(r.seq().to_vec())?);
     }
 
-    Ok(map)
+    Ok((index, seqs))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
