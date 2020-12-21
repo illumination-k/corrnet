@@ -31,3 +31,40 @@ pub fn construct_rank_matrix(corr: &Array2<f64>, size: usize) -> Result<Array2<u
 
     Ok(ArrayBase::from_shape_vec((size, size), rank_vec)?)
 }
+
+
+#[cfg(test)]
+mod test {
+    use ndarray::array;
+
+    use super::*;
+
+    #[test]
+    fn test_hrr() {
+        assert_eq!(hrr(0, 1), 1);
+        assert_eq!(hrr(1, 1), 1);
+        assert_eq!(hrr(5, 1), 5);
+    }
+
+    #[test]
+    fn test_mr() {
+        assert_eq!(mr(1., 2.), (1.0 * 2.0).sqrt());
+    }
+
+    #[test]
+    fn test_construct_rank_matrix_1() {
+        let arr2 = array![
+            [1.0, 0.9, 0.3],
+            [0.9, 1.0, 0.5],
+            [0.3, 0.5, 1.0]
+        ];
+
+        let rank: Array2<usize> = array![
+            [0, 1, 2],
+            [1, 0, 2],
+            [2, 1, 0]
+        ];
+
+        assert_eq!(construct_rank_matrix(&arr2, 3).unwrap(), rank);
+    }
+}
