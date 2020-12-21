@@ -6,7 +6,7 @@ Tools to Construct and Evaluate Rank Based Network
 
 ### construct
 
-Construct Rank (Highest Reciprocal Rank or MR) Based Network from gene expression matrix.
+Construct Rank (Highest Reciprocal Rank or Mutual Rank) Based Network from gene expression matrix.
 
 ### extract
 
@@ -18,4 +18,4 @@ Clustering Rank Based Network by HCCA
 
 ### codon_usage
 
-Evaluate Rank Based Network by codon usage.
+Evaluate Rank Based Network by Codon Usage.

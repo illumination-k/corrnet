@@ -86,6 +86,16 @@ pub enum SubCommands {
         #[structopt(long = "pcc_cutoff")]
         pcc_cutoff: Option<f64>
     },
+    #[structopt(name = "codon_usage", about="extract")]
+    #[structopt(setting(clap::AppSettings::ColoredHelp))]
+    CodonUsage {
+        #[structopt(short = "-i", long = "input_graph")]
+        input_graph: PathBuf,
+        #[structopt(short = "-f", long = "input_fasta")]
+        input_fasta: PathBuf,
+        #[structopt(short = "-p", long = "percent")]
+        percent: f64
+    },
 }
 
 fn main() -> Result<()> {
@@ -133,6 +143,17 @@ fn main() -> Result<()> {
                 output.as_ref(), 
                 rank_cutoff.as_ref(), 
                 pcc_cutoff.as_ref()
+            )?;
+        },
+        SubCommands::CodonUsage {
+            input_graph,
+            input_fasta,
+            percent
+        } => {
+            handlers::codon_usage::parse_args(
+                input_graph,
+                input_fasta,
+                percent
             )?;
         }
     }
