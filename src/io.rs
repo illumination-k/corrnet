@@ -42,19 +42,19 @@ pub fn read_exp_csv<P: AsRef<Path>>(
     Ok(ArrayBase::from_shape_vec(shape, vec)?)
 }
 
-pub fn read_graph_csv<P, T>(p: P) -> Result<graph::Graph<T>> 
-    where P: AsRef<Path>, T: Clone + Copy + Debug + FromStr + Display, <T as FromStr>::Err: std::fmt::Debug
-{
-    let mut rdr = Reader::from_path(p)?;
-    let mut records: Vec<CsvRecord> = vec![];
+// pub fn read_graph_csv<P, T>(p: P) -> Result<graph::Graph<T>> 
+//     where P: AsRef<Path>, T: Clone + Copy + Debug + FromStr + Display, <T as FromStr>::Err: std::fmt::Debug
+// {
+//     let mut rdr = Reader::from_path(p)?;
+//     let mut records: Vec<CsvRecord> = vec![];
 
-    for _r in rdr.deserialize() {
-        let r: CsvRecord = _r?;
-        records.push(r)
-    }
+//     for _r in rdr.deserialize() {
+//         let r: CsvRecord = _r?;
+//         records.push(r)
+//     }
 
-    Ok(graph::Graph::from_records(&records))
-}
+//     Ok(graph::Graph::from_records(&records))
+// }
 
 fn open_with_gz<P: AsRef<Path>>(p: P) -> Result<Box<dyn BufRead>> {
     let r = std::fs::File::open(p.as_ref())?;

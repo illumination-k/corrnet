@@ -98,7 +98,7 @@ fn main() -> Result<()> {
     info!("construct hrr based network... : {}", Local::now());
     let hrr_cutoff: usize = *(&opt.hrr_cutoff);
     let pcc_cutoff: Option<f64> = *(&opt.pcc_cutoff);
-    let mut graph: graph::Graph<usize> = graph::Graph::new(index);
+    let mut graph: graph::Graph<usize> = graph::Graph::new(&index);
     graph.construct_hrr_network(corr, rank_arr, hrr_cutoff, pcc_cutoff);
 
     // calc hcca clusters
