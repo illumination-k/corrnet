@@ -25,9 +25,8 @@ pub fn cosmix<T: Hash + Eq>(
 ) -> f64 {
     // k should smaller than list.len() or equal
     assert!(k <= list.len());
-
-    // list and ref_list should have same length
-    assert!(list.len() == ref_list.len());
+    // k should also smaller than ref_list.len() or equal
+    assert!(k <= ref_list.len());
 
     let denominator: f64 = (1..=k).sum::<usize>() as f64;
     let mut numerator: f64 = 0.;
