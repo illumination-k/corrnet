@@ -4,7 +4,6 @@ extern crate bio;
 extern crate pretty_env_logger;
 extern crate ndarray;
 extern crate ndarray_stats;
-extern crate chrono;
 extern crate num_traits;
 
 #[macro_use]
@@ -15,10 +14,8 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-use std::env::set_var;
+use std::{env::set_var};
 use std::path::PathBuf;
-
-use chrono::{Local};
 
 use ndarray::Array2;
 use ndarray_stats::*;
@@ -75,9 +72,9 @@ fn main() -> Result<()> {
         },
         None => set_var("RUST_LOG", "warn")
     };
-    pretty_env_logger::init();
+    pretty_env_logger::init_timed();
 
-    info!("--- start read {}: {} ---", &opt.input.as_path().to_str().unwrap(), Local::now());
+    info!("--- start read {}  ---", &opt.input.as_path().to_str().unwrap());
 
     // read csv and make ndarray::Array2
     let mut index: Vec<String> = vec![];
@@ -91,11 +88,11 @@ fn main() -> Result<()> {
     debug!("corr[0, 4]: {} {} : {:?}", &index[0], &index[4], corr[[0, 4]]);
 
     // calc rank matrix
-    info!("calculate rank matrix... : {}", Local::now());
+    info!("calculate rank matrix...");
     let array_size = index.len();
     let rank_arr: Array2<usize> = rank::construct_rank_matrix(&corr, array_size)?;
     // construct hrr based network
-    info!("construct hrr based network... : {}", Local::now());
+    info!("construct hrr based network...");
     let hrr_cutoff: usize = *(&opt.hrr_cutoff);
     let pcc_cutoff: Option<f64> = *(&opt.pcc_cutoff);
     let mut graph: graph::Graph<usize> = graph::Graph::new(&index);
@@ -103,7 +100,7 @@ fn main() -> Result<()> {
 
     // calc hcca clusters
 
-    info!("Write csv...: {}", Local::now());
+    info!("Write to csv...");
     io::graph_to_csv("ignore/graph.csv", graph)?;
     // calc codon usage
     Ok(())

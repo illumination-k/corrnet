@@ -2,7 +2,6 @@ use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
 use std::collections::HashMap;
 
-use chrono::{Local};
 use flate2::read::MultiGzDecoder;
 
 use csv::{Reader, Writer};
@@ -38,7 +37,7 @@ pub fn read_exp_csv<P: AsRef<Path>>(
         
     }
     info!("shape: {:?}", shape);
-    info!("caluclate pearson correlation... : {}", Local::now());
+    info!("caluclate pearson correlation...");
     Ok(ArrayBase::from_shape_vec(shape, vec)?)
 }
 
