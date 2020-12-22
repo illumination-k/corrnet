@@ -3,6 +3,8 @@ use anyhow::Result;
 use ndarray::{Array2, ArrayBase};
 use ndarray_stats::*;
 
+use crate::rank;
+
 fn make_codon_map() -> BTreeMap<String, usize> {
     let nuc = vec!['A', 'G', 'C', 'T'];
     let stop_codons = vec!["TGA", "TAA", "TAG"];
@@ -55,11 +57,15 @@ fn make_codon_arr(
     Ok(ArrayBase::from_shape_vec((seq_len, CODON_SIZE), vec)?)
 }
 
-pub fn make_codon_corr(seqs: &Vec<String>) -> Result<Array2<f64>> {
+fn make_codon_corr(seqs: &Vec<String>) -> Result<Array2<f64>> {
     let codon_arr = make_codon_arr(seqs)?;
     Ok(codon_arr.mapv(|x| x as f64).pearson_correlation()?)
 }
 
+pub fn make_codon_rank(seqs: &Vec<String>) -> Result<Array2<usize>> {
+    let codon_corr = make_codon_corr(seqs)?;
+    rank::construct_rank_matrix(&codon_corr, seqs.len())
+}
 
 #[cfg(test)]
 mod test {

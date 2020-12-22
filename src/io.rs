@@ -1,8 +1,7 @@
 use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
-use std::collections::HashMap;
+use std::collections::HashSet;
 
-use chrono::{Local};
 use flate2::read::MultiGzDecoder;
 
 use csv::{Reader, Writer};
@@ -38,22 +37,35 @@ pub fn read_exp_csv<P: AsRef<Path>>(
         
     }
     info!("shape: {:?}", shape);
-    info!("caluclate pearson correlation... : {}", Local::now());
+    info!("calculate pearson correlation...");
     Ok(ArrayBase::from_shape_vec(shape, vec)?)
 }
 
-pub fn read_graph_csv<P, T>(p: P) -> Result<graph::Graph<T>> 
-    where P: AsRef<Path>, T: Clone + Copy + Debug + FromStr + Display, <T as FromStr>::Err: std::fmt::Debug
-{
-    let mut rdr = Reader::from_path(p)?;
-    let mut records: Vec<CsvRecord> = vec![];
+// pub fn read_graph_csv<P, T>(p: P) -> Result<graph::Graph<T>> 
+//     where P: AsRef<Path>, T: Clone + Copy + Debug + FromStr + Display, <T as FromStr>::Err: std::fmt::Debug
+// {
+//     let mut rdr = Reader::from_path(p)?;
+//     let mut records: Vec<CsvRecord> = vec![];
 
-    for _r in rdr.deserialize() {
-        let r: CsvRecord = _r?;
-        records.push(r)
+//     for _r in rdr.deserialize() {
+//         let r: CsvRecord = _r?;
+//         records.push(r)
+//     }
+
+//     Ok(graph::Graph::from_records(&records))
+// }
+
+pub fn read_gene_list<P: AsRef<Path>>(p: &P) -> Result<HashSet<String>> {
+    let mut rdr = Reader::from_path(p)?;
+
+    let mut res: HashSet<String> = HashSet::new();
+
+    for _r in rdr.records() {
+        let r = _r?;
+        res.insert(r.into_iter().nth(0).unwrap().to_string());
     }
 
-    Ok(graph::Graph::from_records(&records))
+    Ok(res)
 }
 
 fn open_with_gz<P: AsRef<Path>>(p: P) -> Result<Box<dyn BufRead>> {
@@ -70,16 +82,18 @@ fn open_with_gz<P: AsRef<Path>>(p: P) -> Result<Box<dyn BufRead>> {
     }
 }
 
-pub fn read_fasta<P: AsRef<Path>>(fasta: P) -> Result<HashMap<String, String>> {
-    let mut map: HashMap<String, String> = HashMap::new();
+pub fn read_fasta<P: AsRef<Path>>(fasta: P) -> Result<(Vec<String>, Vec<String>)> {
+    let mut index = vec![];
+    let mut seqs = vec![];
     let rdr = bio::io::fasta::Reader::new(open_with_gz(fasta)?);
     
     for _r in rdr.records() {
         let r = _r?;
-        map.entry(r.id().to_string()).or_insert(String::from_utf8(r.seq().to_vec())?);
+        index.push(r.id().to_string());
+        seqs.push(String::from_utf8(r.seq().to_vec())?);
     }
 
-    Ok(map)
+    Ok((index, seqs))
 }
 
 #[derive(Debug, Serialize, Deserialize)]
