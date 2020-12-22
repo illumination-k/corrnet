@@ -41,7 +41,7 @@ pub fn parse_args(
     let mut cosmix_values: Vec<f64> = vec![];
 
     for i in 0..index.len() {
-        // let gene_id = index[i].clone();
+        // let gene_id = index[i]
         let corr_ranked_vec: Vec<String> = sort_corr_by_rank(&mut map, &index[i]);
         let codon_ranked_vec: Vec<String> = rank::get_index_sorted_by_rank(&codon_rank, i, &index);
 
@@ -49,12 +49,12 @@ pub fn parse_args(
             similarity::cosmix(
                 &corr_ranked_vec, 
                 &codon_ranked_vec,
-                k
+                k,
             ) 
         );
     }
 
-    // print median of comix values
+    // print median of cosmix values
     println!("Codon Score: {}", similarity::median(&cosmix_values));
 
     Ok(())
@@ -95,6 +95,6 @@ mod test {
             ["gene_2", "gene_5", "gene_4", "gene_3"].iter()
                 .map(|x| x.to_string())
                 .collect::<Vec<String>>()
-        )
+        );
     }
 }
