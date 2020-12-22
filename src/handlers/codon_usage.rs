@@ -13,8 +13,12 @@ pub fn parse_args(
     input_fasta: &PathBuf,
     percent: &f64,
 ) -> Result<()> {
+    info!("start caluculate coden score...");
+
+    info!("start read fasta...");
     let (index, seqs) = io::read_fasta(input_fasta)?;
 
+    info!("start construct codon rank matrix");
     // codon arr: convert to rank
     let codon_rank = codon::make_codon_rank(&seqs)?;
 
@@ -22,6 +26,7 @@ pub fn parse_args(
     let k = (index.len() as f64 * percent) as usize;
 
     // graph: sort by rank
+    info!("start to read graph...");
     let mut rdr = Reader::from_path(input_graph)?;
     let mut map: HashMap<String, Vec<(String, OrderedFloat<f64>)>> = HashMap::new();
 
@@ -37,12 +42,17 @@ pub fn parse_args(
             .push((gene_1, rank));
     }
 
+    info!("start calculate cosmix score...");
+
     // calc cosmix values
     let mut cosmix_values: Vec<f64> = vec![];
 
     for i in 0..index.len() {
         // let gene_id = index[i]
-        let corr_ranked_vec: Vec<String> = sort_corr_by_rank(&mut map, &index[i]);
+        let corr_ranked_vec: Vec<String> = match sort_corr_by_rank(&mut map, &index[i]) {
+            Some(v) => v,
+            None => continue
+        };
         let codon_ranked_vec: Vec<String> = rank::get_index_sorted_by_rank(&codon_rank, i, &index);
 
         cosmix_values.push(
@@ -63,14 +73,17 @@ pub fn parse_args(
 fn sort_corr_by_rank(
     map: &mut HashMap<String, Vec<(String, OrderedFloat<f64>)>>,
     key: &String
-) -> Vec<String> {
-    let corr_ranked = map.get_mut(key).unwrap();
+) -> Option<Vec<String>> {
+    let corr_ranked = match map.get_mut(key) {
+        Some(v) => v,
+        None => return None,
+    };
     
     corr_ranked.sort_by(|a, b| a.1.cmp(&b.1));
 
-    corr_ranked.iter()
+    Some(corr_ranked.iter()
         .map(|x| x.0.to_owned())
-        .collect()
+        .collect())
 }
 
 #[cfg(test)]
@@ -89,7 +102,7 @@ mod test {
         ];
         map.insert(gene_1.clone(), gene_1_vec);
 
-        let corr_ranked_vec = sort_corr_by_rank(&mut map, &gene_1);
+        let corr_ranked_vec = sort_corr_by_rank(&mut map, &gene_1).unwrap();
         assert_eq!(
             corr_ranked_vec,
             ["gene_2", "gene_5", "gene_4", "gene_3"].iter()
