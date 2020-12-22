@@ -59,3 +59,39 @@ pub fn make_codon_corr(seqs: &Vec<String>) -> Result<Array2<f64>> {
     let codon_arr = make_codon_arr(seqs)?;
     Ok(codon_arr.mapv(|x| x as f64).pearson_correlation()?)
 }
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_make_codon_map() {
+        let codon_map = make_codon_map();
+        // check size (4 * 4 * 4 - 3)
+        assert_eq!(codon_map.iter().count(), 61);
+    }
+
+    #[test]
+    fn test_make_codon_vec_1() {
+        let seq = "ATGCAGCCCCAGTGA";
+        let codon_vec = make_codon_vec(seq);
+
+        let mut codon_map = make_codon_map();
+        codon_map.insert("ATG".to_string(), 1);
+        codon_map.insert("CAG".to_string(), 2);
+        codon_map.insert("CCC".to_string(), 1);
+
+        for (i, (k, v)) in codon_map.iter().enumerate() {
+            // check index order
+            if *v == 1 {
+                assert_eq!(codon_vec[i], 1);
+            }
+
+            // check stop codon
+            if k == "TGA" {
+                assert_eq!(codon_vec[i], 0)
+            }
+        }
+    }
+}
