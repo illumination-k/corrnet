@@ -22,9 +22,6 @@ pub fn parse_args(
     // codon arr: convert to rank
     let codon_rank = codon::make_codon_rank(&seqs)?;
 
-
-    let k = (index.len() as f64 * percent) as usize;
-
     // graph: sort by rank
     info!("start to read graph...");
     let mut rdr = Reader::from_path(input_graph)?;
@@ -41,6 +38,14 @@ pub fn parse_args(
             .or_insert(Vec::new())
             .push((gene_1, rank));
     }
+
+    let corr_index_cnt = map.keys().count();
+    let fasta_index_cnt = index.len();
+
+    let k = (std::cmp::min(corr_index_cnt, fasta_index_cnt) as f64 * percent) as usize;
+
+    info!("In rank based graph, there is {} genes and in fasta, there is {} genes", corr_index_cnt, fasta_index_cnt);
+    info!("This tool calculate top_k as {}", k);
 
     info!("start calculate cosmix score...");
 
@@ -63,6 +68,8 @@ pub fn parse_args(
             ) 
         );
     }
+
+    info!("caluculation is done!");
 
     // print median of cosmix values
     println!("Codon Score: {}", similarity::median(&cosmix_values));
@@ -108,6 +115,11 @@ mod test {
             ["gene_2", "gene_5", "gene_4", "gene_3"].iter()
                 .map(|x| x.to_string())
                 .collect::<Vec<String>>()
+        );
+
+        assert_eq!(
+            sort_corr_by_rank(&mut map, &"gene_2".to_string()),
+            None,
         );
     }
 }
