@@ -6,6 +6,7 @@ use ordered_float::OrderedFloat;
 use crate::io;
 use crate::codon;
 use crate::similarity;
+use crate::rank;
 
 pub fn parse_args(
     input_graph: &PathBuf,
@@ -40,17 +41,9 @@ pub fn parse_args(
     let mut cosmix_values: Vec<f64> = vec![];
 
     for i in 0..index.len() {
-        let gene_id = index[i].clone();
-        let corr_ranked = map.get_mut(&gene_id).unwrap();
-        corr_ranked.sort_by(|a, b| a.1.cmp(&b.1));
-        let corr_ranked_vec: Vec<String> = corr_ranked.iter().map(|x| x.0.to_owned()).collect();
-        let mut codon_ranked_vec: Vec<String> = vec!["".to_string(); index.len() - 1];
-
-        for j in 0..index.len() {
-            let rank = codon_rank[[i, j]];
-            if rank == 0 { continue; }
-            codon_ranked_vec[rank-1] = index[j].clone();
-        }
+        // let gene_id = index[i].clone();
+        let corr_ranked_vec: Vec<String> = sort_corr_by_rank(&mut map, &index[i]);
+        let codon_ranked_vec: Vec<String> = rank::get_index_sorted_by_rank(&codon_rank, i, &index);
 
         cosmix_values.push(
             similarity::cosmix(
@@ -65,4 +58,43 @@ pub fn parse_args(
     println!("Codon Score: {}", similarity::median(&cosmix_values));
 
     Ok(())
+}
+
+fn sort_corr_by_rank(
+    map: &mut HashMap<String, Vec<(String, OrderedFloat<f64>)>>,
+    key: &String
+) -> Vec<String> {
+    let corr_ranked = map.get_mut(key).unwrap();
+    
+    corr_ranked.sort_by(|a, b| a.1.cmp(&b.1));
+
+    corr_ranked.iter()
+        .map(|x| x.0.to_owned())
+        .collect()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_sort_corr_by_rank() {
+        let mut map: HashMap<String, Vec<(String, OrderedFloat<f64>)>> = HashMap::new();
+        let gene_1 = "gene_1".to_string();
+        let gene_1_vec:  Vec<(String, OrderedFloat<f64>)>= vec![
+            ("gene_2".to_string(), OrderedFloat::from(1.0)),
+            ("gene_3".to_string(), OrderedFloat::from(4.0)),
+            ("gene_4".to_string(), OrderedFloat::from(3.0)),
+            ("gene_5".to_string(), OrderedFloat::from(2.0))
+        ];
+        map.insert(gene_1.clone(), gene_1_vec);
+
+        let corr_ranked_vec = sort_corr_by_rank(&mut map, &gene_1);
+        assert_eq!(
+            corr_ranked_vec,
+            ["gene_2", "gene_5", "gene_4", "gene_3"].iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<String>>()
+        )
+    }
 }

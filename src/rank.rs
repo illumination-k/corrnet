@@ -33,6 +33,23 @@ pub fn construct_rank_matrix(corr: &Array2<f64>, size: usize) -> Result<Array2<u
 }
 
 
+pub fn get_index_sorted_by_rank(
+    rank_matrix: &Array2<usize>,
+    i: usize,
+    index: &Vec<String>
+) -> Vec<String> {
+    let mut rank_vec: Vec<String> = vec!["".to_string(); index.len() - 1];
+
+    for j in 0..index.len() {
+        let rank = rank_matrix[[i, j]];
+        if rank == 0 { continue; }
+        rank_vec[rank - 1] = index[j].clone();
+    }
+
+    rank_vec
+}
+
+
 #[cfg(test)]
 mod test {
     use ndarray::array;
@@ -66,5 +83,38 @@ mod test {
         ];
 
         assert_eq!(construct_rank_matrix(&arr2, 3).unwrap(), rank);
+    }
+
+    #[test]
+    fn test_get_index_sorted_by_rank() {
+        let rank: Array2<usize> = array![
+            [0, 1, 2],
+            [1, 0, 2],
+            [2, 1, 0]
+        ];
+
+        let index: Vec<String> = ["gene_1", "gene_2", "gene_3"].iter()
+                                                        .map(|x| x.to_string())
+                                                        .collect();
+        
+        assert_eq!(
+            get_index_sorted_by_rank(&rank, 0, &index),
+            ["gene_2", "gene_3"].iter()
+                                    .map(|x| x.to_string())
+                                    .collect::<Vec<String>>()
+        );
+
+        assert_eq!(
+            get_index_sorted_by_rank(&rank, 1, &index),
+            ["gene_1", "gene_3"].iter()
+                                    .map(|x| x.to_string())
+                                    .collect::<Vec<String>>()
+        );
+        assert_eq!(
+            get_index_sorted_by_rank(&rank, 2, &index),
+            ["gene_2", "gene_1"].iter()
+                                    .map(|x| x.to_string())
+                                    .collect::<Vec<String>>()
+        );
     }
 }
