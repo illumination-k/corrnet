@@ -12,6 +12,10 @@ Construct Rank (Highest Reciprocal Rank or Mutual Rank) Based Network from gene 
 
 Extract Subnetwork by Gene IDs and Filter Network by Rank or PCC.
 
+### query
+
+Get neighborhood genes queried by gene id.
+
 ### clustering
 
 Clustering Rank Based Network by HCCA
