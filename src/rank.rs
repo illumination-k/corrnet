@@ -86,7 +86,7 @@ mod test {
     }
 
     #[test]
-    fn test_get_index_sorted_by_rank() {
+    fn test_get_index_sorted_by_rank_1() {
         let rank: Array2<usize> = array![
             [0, 1, 2],
             [1, 0, 2],
