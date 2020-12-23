@@ -13,8 +13,7 @@ pub fn var(list: &Vec<f64>, ddof: f64) -> f64 {
 }
 
 pub fn std(list: &Vec<f64>, ddof: f64) -> f64 {
-    let var = var(list, ddof);
-    var.sqrt()
+    var(list, ddof).sqrt()
 }
 
 pub fn median (list: &Vec<f64>) -> f64 {
@@ -47,12 +46,22 @@ mod test {
 
         let one = vec![1.];
         assert_eq!(median(&one), 1.);
+
+        let rand10 = vec![0.32840955, 0.48140666, 0.1176708 , 0.10189263, 0.53973073, 0.49730681, 0.42883597, 0.86240549, 0.84503774, 0.22184689];
+        assert_abs_diff_eq!(median(&rand10), 0.45512131499999997);
+
+        let rand9 = vec![0.32840955, 0.48140666, 0.1176708 , 0.10189263, 0.53973073, 0.49730681, 0.42883597, 0.86240549, 0.84503774];
+        assert_eq!(median(&rand9), 0.48140666);
     }
 
     #[test]
-    fn test_std() {
+    fn test_std_1() {
         let rand5 = vec![0.30330361, 0.04612777, 0.41467306, 0.15042536, 0.01180612];
         assert_abs_diff_eq!(std(&rand5, 1.), 0.171188582970728);
         assert_abs_diff_eq!(std(&rand5, 0.), 0.1531157233977643);
+
+        let rand10 = vec![0.32840955, 0.48140666, 0.1176708 , 0.10189263, 0.53973073, 0.49730681, 0.42883597, 0.86240549, 0.84503774, 0.22184689];
+        assert_abs_diff_eq!(std(&rand10, 1.), 0.265779165304154);
+        assert_abs_diff_eq!(std(&rand10, 0.), 0.2521402550938575);
     }
 }

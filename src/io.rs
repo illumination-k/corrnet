@@ -6,9 +6,10 @@ use flate2::read::MultiGzDecoder;
 
 use csv::{Reader, Writer};
 use anyhow::Result;
-use ndarray::{Axis, ArrayBase, Array1, Array2, aview0};
+use ndarray::{ArrayBase, Array2};
 
 use crate::graph;
+use crate::math;
 
 pub fn read_exp_csv<P: AsRef<Path>>(
     input: P, 
@@ -27,8 +28,7 @@ pub fn read_exp_csv<P: AsRef<Path>>(
             .collect();
         
         // Whine std == 0, continue. Maybe use approx for abs_diff_eq
-        let exp_arr: Array1<f64> = ArrayBase::from(exp_vec.clone());
-        if exp_arr.std_axis(Axis(0), 1.0) == aview0(&0.) { continue; }
+        if math::std(&exp_vec, 1.) == 0. { continue; }
 
         index.push(r[0].to_string());
         vec.extend(exp_vec);
