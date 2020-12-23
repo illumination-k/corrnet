@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::{Display, Debug}, str::FromStr, vec};
+use std::fmt::{Display, Debug};
 use ndarray::{Array2};
 
 use crate::io;
@@ -65,7 +65,8 @@ impl<T> Edge<T>
     pub fn query(&self) -> usize {
         self.node_1
     }
-
+    
+    #[allow(dead_code)]
     pub fn target(&self) -> usize {
         self.node_2
     }
