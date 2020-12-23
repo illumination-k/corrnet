@@ -7,6 +7,7 @@ use crate::io;
 use crate::codon;
 use crate::similarity;
 use crate::rank;
+use crate::math;
 
 pub fn parse_args(
     input_graph: &PathBuf,
@@ -72,7 +73,7 @@ pub fn parse_args(
     info!("caluculation is done!");
 
     // print median of cosmix values
-    println!("Codon Score: {}", similarity::median(&cosmix_values));
+    println!("Codon Score: {}", math::median(&cosmix_values));
 
     Ok(())
 }
