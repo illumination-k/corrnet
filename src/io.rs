@@ -28,7 +28,7 @@ pub fn read_exp_csv<P: AsRef<Path>>(
         
         // Whine std == 0, continue. Maybe use approx for abs_diff_eq
         let exp_arr: Array1<f64> = ArrayBase::from(exp_vec.clone());
-        if exp_arr.std_axis(Axis(0), 1.0)  == aview0(&0.) { continue; }
+        if exp_arr.std_axis(Axis(0), 1.0) == aview0(&0.) { continue; }
 
         index.push(r[0].to_string());
         vec.extend(exp_vec);

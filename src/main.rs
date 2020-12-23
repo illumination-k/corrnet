@@ -26,6 +26,7 @@ mod codon;
 mod similarity;
 mod rank;
 mod handlers;
+mod math;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "hrr_corrnet")]
