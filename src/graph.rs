@@ -103,6 +103,14 @@ impl<T> Graph<T>
         }
     }
 
+    pub fn from_edges(nodes: &Vec<String>, edges: &Vec<Edge<T>>) -> Self {
+        let mut g = Graph::new(nodes);
+        for edge in edges.iter() {
+            g.push(edge.clone())
+        }
+        g
+     }
+
     fn push(&mut self, edge: Edge<T>) {
         let query = edge.query();
         self.nodes[query].push(edge);
