@@ -1,6 +1,11 @@
 use std::collections::HashSet;
 use std::hash::Hash;
 
+/// Cosmix score:
+///
+/// $$ COSMIX(list, ref_list, k) = \sum_{i=1}^{k} n(i, list, ref_list) / \sum_{i=1}^{k} i $$
+/// where n(i, list, ref_list) is the number of elements in the top i element in list 
+/// with corresponding elements in the top i elements in ref_list 
 pub fn cosmix<T: Hash + Eq>(
     list: &Vec<T>,
     ref_list: &Vec<T>,
