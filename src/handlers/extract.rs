@@ -32,9 +32,7 @@ pub fn parse_args(
         let r: io::ByteCsvRecord = raw_record.deserialize(Some(&headers))?;
 
         // filter by gene ids
-        let (gene_1, gene_2) = unsafe {
-            r.genes_unchecked()
-        };
+        let (gene_1, gene_2) =  r.genes_unchecked();
         
         if let Some(gene_set) = gene_set.as_ref() {
             if !(gene_set.contains(&gene_1) && gene_set.contains(&gene_2)) {
