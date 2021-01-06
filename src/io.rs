@@ -2,6 +2,7 @@ use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
 use std::collections::HashSet;
 
+use bio::alignment::poa::Poa;
 use flate2::read::MultiGzDecoder;
 
 use csv::{Reader, Writer};
@@ -128,6 +129,71 @@ impl CsvRecord {
         self.rank.parse().unwrap()
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ByteCsvRecord<'a> {
+    gene_1: &'a [u8],
+    gene_2: &'a [u8],
+    corr: f64,
+    rank: f64,
+}
+
+impl ByteCsvRecord<'_> {
+    pub fn gene_1_unchecked(&self) -> String {
+        unsafe {
+            String::from_utf8_unchecked(self.gene_1.to_vec())
+        }
+    }
+
+    pub fn gene_2_unchecked(&self) -> String {
+        unsafe {
+            String::from_utf8_unchecked(self.gene_2.to_vec())
+        }
+    }
+
+    pub fn genes_unchecked(&self) -> (String, String) {
+        unsafe {
+            (self.gene_1_unchecked(), self.gene_2_unchecked())
+        }
+    }
+
+    pub fn gene_1_bytes(&self) -> &[u8] {
+        self.gene_1
+    }
+
+    pub fn gene_2_bytes(&self) -> &[u8] {
+        self.gene_2
+    }
+
+    pub fn genes_bytes(&self) -> (&[u8], &[u8]) {
+        (self.gene_1, self.gene_2)
+    }
+
+    #[allow(dead_code)]
+    pub fn gene_1(&self) -> std::result::Result<String, std::string::FromUtf8Error> {
+        String::from_utf8(self.gene_1.to_vec())
+    }
+
+    #[allow(dead_code)]
+    pub fn gene_2(&self) -> std::result::Result<String, std::string::FromUtf8Error> {
+        String::from_utf8(self.gene_2.to_vec())
+    }
+
+    #[allow(dead_code)]
+    pub fn genes(&self) -> Result<(String, String)> {
+        Ok(self.gene_1()?, self.gene_2()?)
+    }
+
+
+    pub fn corr(&self) -> f64 {
+        self.corr
+    }
+
+    pub fn rank(&self) -> f64 {
+        self.rank
+    }
+ }
+
 
 pub fn graph_to_csv<P, T>(
     outpath: P, 
