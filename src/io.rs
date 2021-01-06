@@ -2,7 +2,6 @@ use std::{fmt::{Display, Debug}, path::Path, str::FromStr};
 use std::io::{BufRead, BufReader};
 use std::collections::HashSet;
 
-use bio::alignment::poa::Poa;
 use flate2::read::MultiGzDecoder;
 
 use csv::{Reader, Writer};
@@ -181,7 +180,7 @@ impl ByteCsvRecord<'_> {
 
     #[allow(dead_code)]
     pub fn genes(&self) -> Result<(String, String)> {
-        Ok(self.gene_1()?, self.gene_2()?)
+        Ok((self.gene_1()?, self.gene_2()?))
     }
 
 

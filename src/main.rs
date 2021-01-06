@@ -20,6 +20,10 @@ use std::path::PathBuf;
 use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
 
+#[cfg(test)]
+#[macro_use]
+extern crate maplit;
+
 mod io;
 mod graph;
 mod codon;
