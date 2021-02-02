@@ -151,9 +151,7 @@ impl ByteCsvRecord<'_> {
     }
 
     pub fn genes_unchecked(&self) -> (String, String) {
-        unsafe {
-            (self.gene_1_unchecked(), self.gene_2_unchecked())
-        }
+        (self.gene_1_unchecked(), self.gene_2_unchecked())
     }
 
     pub fn gene_1_bytes(&self) -> &[u8] {
@@ -164,6 +162,7 @@ impl ByteCsvRecord<'_> {
         self.gene_2
     }
 
+    #[allow(dead_code)]
     pub fn genes_bytes(&self) -> (&[u8], &[u8]) {
         (self.gene_1, self.gene_2)
     }

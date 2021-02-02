@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use anyhow::Result;
 use csv::{Reader, Writer};
@@ -6,13 +6,14 @@ use csv::{Reader, Writer};
 use crate::io;
 
 pub fn parse_args(
-    gene_id: &str,
+    gene_id: &String,
+    input_path: &PathBuf,
     depth: usize,
     pcc_cutoff: Option<&f64>,
     rank_cutoff: Option<&f64>,
 ) -> Result<()> {
     let gene_id_bytes = gene_id.as_bytes();
-    let mut rdr = Reader::from_path("test")?;
+    let mut rdr = Reader::from_path(input_path)?;
     let mut wtr = Writer::from_path("test")?;
 
     let mut raw_record = csv::ByteRecord::new();
