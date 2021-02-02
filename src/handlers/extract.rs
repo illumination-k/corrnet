@@ -35,7 +35,7 @@ pub fn parse_args(
         let (gene_1, gene_2) =  r.genes_unchecked();
         
         if let Some(gene_set) = gene_set.as_ref() {
-            if !(gene_set.contains(&gene_1) && gene_set.contains(&gene_2)) {
+            if !(gene_set.contains(&gene_1) || gene_set.contains(&gene_2)) {
                 continue;
             }
         }
