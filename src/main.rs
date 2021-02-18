@@ -12,9 +12,12 @@ extern crate log;
 extern crate serde;
 
 #[macro_use]
+<<<<<<< HEAD
 extern crate approx;
 
 #[macro_use]
+=======
+>>>>>>> origin/main
 extern crate serde_derive;
 
 use std::{env::set_var};
@@ -23,6 +26,13 @@ use std::path::PathBuf;
 use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
 
+<<<<<<< HEAD
+=======
+#[cfg(test)]
+#[macro_use]
+extern crate maplit;
+
+>>>>>>> origin/main
 mod io;
 mod graph;
 mod codon;
@@ -76,7 +86,11 @@ pub enum SubCommands {
         #[structopt(long = "pcc_cutoff")]
         pcc_cutoff: Option<f64>
     },
+<<<<<<< HEAD
     #[structopt(name = "extract", about="extract genes in user provided gene list")]
+=======
+    #[structopt(name = "extract", about="extract")]
+>>>>>>> origin/main
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     Extract {
         #[structopt(short = "-i", long = "input")]
@@ -90,7 +104,11 @@ pub enum SubCommands {
         #[structopt(long = "pcc_cutoff")]
         pcc_cutoff: Option<f64>
     },
+<<<<<<< HEAD
     #[structopt(name = "codon_usage", about="evaluate network with codon usage")]
+=======
+    #[structopt(name = "codon_usage", about="extract")]
+>>>>>>> origin/main
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     CodonUsage {
         #[structopt(short = "-i", long = "input_graph")]
@@ -100,7 +118,11 @@ pub enum SubCommands {
         #[structopt(short = "-p", long = "percent")]
         percent: f64
     },
+<<<<<<< HEAD
     #[structopt(name = "query", about = "get surrounding genes of query")]
+=======
+    #[structopt(name = "query", about = "query")]
+>>>>>>> origin/main
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     Query {
         #[structopt(short = "q", long = "query_gene_id")]

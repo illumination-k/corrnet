@@ -14,7 +14,11 @@ pub fn parse_args(
 ) -> Result<()> {
     let gene_id_bytes = gene_id.as_bytes();
     let mut rdr = Reader::from_path(input_path)?;
+<<<<<<< HEAD
     let mut wtr = Writer::from_path("test_query.csv")?;
+=======
+    let mut wtr = Writer::from_path("test")?;
+>>>>>>> origin/main
 
     let mut raw_record = csv::ByteRecord::new();
     let headers = rdr.byte_headers()?.clone();
@@ -33,8 +37,13 @@ pub fn parse_args(
             if let Some(rank_cutoff) = rank_cutoff {
                 if record.rank() > *rank_cutoff { continue; }
             }
+<<<<<<< HEAD
             let byte_rec = io::CsvRecord::from_byte_records(&record);
             wtr.serialize(byte_rec)?;
+=======
+
+            wtr.serialize(record)?;
+>>>>>>> origin/main
         }
 
         wtr.flush()?;
@@ -72,6 +81,7 @@ pub fn parse_args(
             .or_insert((record.corr(), record.rank()));
     }
 
+<<<<<<< HEAD
     let mut edges = vec![];
     dfs(gene_id, 0, depth, &mut edges, &graph);
 
@@ -80,6 +90,8 @@ pub fn parse_args(
         wtr.serialize(rec)?;
     }
     wtr.flush()?;
+=======
+>>>>>>> origin/main
     Ok(())
 }
 
@@ -97,10 +109,14 @@ fn dfs(
     };
 
     for k in map.keys() {
+<<<<<<< HEAD
         let (corr, rank) = match map.get(k) {
             Some((corr, rank)) => { (corr, rank) },
             None => {continue;}
         };
+=======
+        let (corr, rank) = map.get(query).unwrap();
+>>>>>>> origin/main
         edges.push((query.clone(), k.clone(), *corr, *rank));
         dfs(k, depth + 1, depth_limit, edges, graph);
     }
@@ -108,6 +124,7 @@ fn dfs(
 
 #[cfg(test)]
 pub mod test {
+<<<<<<< HEAD
     use std::collections::HashMap;
 
     use super::dfs;
@@ -145,4 +162,7 @@ pub mod test {
             assert!(ans.contains(edge))
         }
     }
+=======
+    use super::dfs;
+>>>>>>> origin/main
 }

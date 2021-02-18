@@ -103,7 +103,10 @@ impl<T> Graph<T>
         }
     }
 
+<<<<<<< HEAD
     #[allow(dead_code)]
+=======
+>>>>>>> origin/main
     pub fn from_edges(nodes: &Vec<String>, edges: &Vec<Edge<T>>) -> Self {
         let mut g = Graph::new(nodes);
         for edge in edges.iter() {

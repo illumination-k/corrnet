@@ -118,7 +118,10 @@ impl CsvRecord {
         (self.gene_1.clone(), self.gene_2.clone())
     }
 
+<<<<<<< HEAD
     #[allow(dead_code)]
+=======
+>>>>>>> origin/main
     pub fn corr(&self) -> f64 {
         self.corr
     }
@@ -128,6 +131,7 @@ impl CsvRecord {
     {
         self.rank.parse().unwrap()
     }
+<<<<<<< HEAD
 
     pub fn from_tuple(edge: &(String, String, f64, f64)) -> Self {
         Self {
@@ -146,6 +150,8 @@ impl CsvRecord {
             rank: rec.rank().to_string()
         }
     }
+=======
+>>>>>>> origin/main
 }
 
 #[derive(Debug, Serialize, Deserialize)]
