@@ -24,7 +24,10 @@ pub fn parse_args(
 
     let gene_set: Option<HashSet<String>> = match gene_list {
         Some(p) => Some(io::read_gene_list(p)?),
-        None => None
+        None => {
+            eprintln!("No gene list is provided!");
+            std::process::exit(1)
+        }
     };
 
     while rdr.read_byte_record(&mut raw_record)? {

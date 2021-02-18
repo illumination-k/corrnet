@@ -118,6 +118,7 @@ impl CsvRecord {
         (self.gene_1.clone(), self.gene_2.clone())
     }
 
+    #[allow(dead_code)]
     pub fn corr(&self) -> f64 {
         self.corr
     }
@@ -126,6 +127,24 @@ impl CsvRecord {
         where <T as FromStr>::Err: std::fmt::Debug
     {
         self.rank.parse().unwrap()
+    }
+
+    pub fn from_tuple(edge: &(String, String, f64, f64)) -> Self {
+        Self {
+            gene_1: edge.0.to_owned(),
+            gene_2: edge.1.to_owned(),
+            corr: edge.2,
+            rank: edge.3.to_string()
+        }
+    }
+
+    pub fn from_byte_records(rec: &ByteCsvRecord) -> Self {
+        Self {
+            gene_1: rec.gene_1_unchecked(),
+            gene_2: rec.gene_2_unchecked(),
+            corr: rec.corr(),
+            rank: rec.rank().to_string()
+        }
     }
 }
 
