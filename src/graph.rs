@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::{Display, Debug}, str::FromStr, vec};
+use std::fmt::{Display, Debug};
 use ndarray::{Array2};
 
 use crate::io;
@@ -65,7 +65,8 @@ impl<T> Edge<T>
     pub fn query(&self) -> usize {
         self.node_1
     }
-
+    
+    #[allow(dead_code)]
     pub fn target(&self) -> usize {
         self.node_2
     }
@@ -101,6 +102,14 @@ impl<T> Graph<T>
             nodes: nodes.iter().map(|x| Node::new(x.clone())).collect()
         }
     }
+
+    pub fn from_edges(nodes: &Vec<String>, edges: &Vec<Edge<T>>) -> Self {
+        let mut g = Graph::new(nodes);
+        for edge in edges.iter() {
+            g.push(edge.clone())
+        }
+        g
+     }
 
     fn push(&mut self, edge: Edge<T>) {
         let query = edge.query();

@@ -6,9 +6,10 @@ use flate2::read::MultiGzDecoder;
 
 use csv::{Reader, Writer};
 use anyhow::Result;
-use ndarray::{Axis, ArrayBase, Array1, Array2, aview0};
+use ndarray::{ArrayBase, Array2};
 
 use crate::graph;
+use crate::math;
 
 pub fn read_exp_csv<P: AsRef<Path>>(
     input: P, 
@@ -27,8 +28,7 @@ pub fn read_exp_csv<P: AsRef<Path>>(
             .collect();
         
         // Whine std == 0, continue. Maybe use approx for abs_diff_eq
-        let exp_arr: Array1<f64> = ArrayBase::from(exp_vec.clone());
-        if exp_arr.std_axis(Axis(0), 1.0) == aview0(&0.) { continue; }
+        if math::std(&exp_vec, 1.) == 0. { continue; }
 
         index.push(r[0].to_string());
         vec.extend(exp_vec);
@@ -128,6 +128,70 @@ impl CsvRecord {
         self.rank.parse().unwrap()
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ByteCsvRecord<'a> {
+    gene_1: &'a [u8],
+    gene_2: &'a [u8],
+    corr: f64,
+    rank: f64,
+}
+
+impl ByteCsvRecord<'_> {
+    pub fn gene_1_unchecked(&self) -> String {
+        unsafe {
+            String::from_utf8_unchecked(self.gene_1.to_vec())
+        }
+    }
+
+    pub fn gene_2_unchecked(&self) -> String {
+        unsafe {
+            String::from_utf8_unchecked(self.gene_2.to_vec())
+        }
+    }
+
+    pub fn genes_unchecked(&self) -> (String, String) {
+        (self.gene_1_unchecked(), self.gene_2_unchecked())
+    }
+
+    pub fn gene_1_bytes(&self) -> &[u8] {
+        self.gene_1
+    }
+
+    pub fn gene_2_bytes(&self) -> &[u8] {
+        self.gene_2
+    }
+
+    #[allow(dead_code)]
+    pub fn genes_bytes(&self) -> (&[u8], &[u8]) {
+        (self.gene_1, self.gene_2)
+    }
+
+    #[allow(dead_code)]
+    pub fn gene_1(&self) -> std::result::Result<String, std::string::FromUtf8Error> {
+        String::from_utf8(self.gene_1.to_vec())
+    }
+
+    #[allow(dead_code)]
+    pub fn gene_2(&self) -> std::result::Result<String, std::string::FromUtf8Error> {
+        String::from_utf8(self.gene_2.to_vec())
+    }
+
+    #[allow(dead_code)]
+    pub fn genes(&self) -> Result<(String, String)> {
+        Ok((self.gene_1()?, self.gene_2()?))
+    }
+
+
+    pub fn corr(&self) -> f64 {
+        self.corr
+    }
+
+    pub fn rank(&self) -> f64 {
+        self.rank
+    }
+ }
+
 
 pub fn graph_to_csv<P, T>(
     outpath: P, 

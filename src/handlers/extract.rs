@@ -15,6 +15,8 @@ pub fn parse_args(
     pcc_cutoff: Option<&f64>,
 ) -> Result<()> {
     let mut rdr = Reader::from_path(input)?;
+    let mut raw_record = csv::ByteRecord::new();
+    let headers = rdr.byte_headers()?.clone();
 
     let default_path = PathBuf::from("extracted_network.csv");
     let out_path = output.unwrap_or(&default_path);
@@ -25,21 +27,22 @@ pub fn parse_args(
         None => None
     };
 
-    for _r in rdr.deserialize() {
-        let r: io::CsvRecord = _r?;
+    while rdr.read_byte_record(&mut raw_record)? {
+    // for _r in rdr.deserialize() {
+        let r: io::ByteCsvRecord = raw_record.deserialize(Some(&headers))?;
 
         // filter by gene ids
-        let (gene_1, gene_2) = r.genes();
+        let (gene_1, gene_2) =  r.genes_unchecked();
         
         if let Some(gene_set) = gene_set.as_ref() {
-            if !(gene_set.contains(&gene_1) && gene_set.contains(&gene_2)) {
+            if !(gene_set.contains(&gene_1) || gene_set.contains(&gene_2)) {
                 continue;
             }
         }
 
         // filter by rank
         if let Some(rank_cutoff) = rank_cutoff {
-            let rank = r.rank::<f64>();
+            let rank = r.rank();
             if *rank_cutoff < rank { continue; }
         }
 

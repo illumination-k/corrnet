@@ -1,8 +1,8 @@
 # README
 
-Tools to Construct and Evaluate Rank Based Network
+Tools to Construct and Evaluate Rank Based Co-Expression Network
 
-## Sub Commands
+## Commands
 
 ### construct
 
@@ -10,7 +10,7 @@ Construct Rank (Highest Reciprocal Rank or Mutual Rank) Based Network from gene 
 
 ### extract
 
-Extract Subnetwork by Gene IDs and Filter Network by Rank or PCC.
+Extract subnetwork by gene IDs and filter network by rank or Pearson Correlation Coeficient.
 
 ### query
 

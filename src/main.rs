@@ -20,6 +20,10 @@ use std::path::PathBuf;
 use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
 
+#[cfg(test)]
+#[macro_use]
+extern crate maplit;
+
 mod io;
 mod graph;
 mod codon;
@@ -97,6 +101,20 @@ pub enum SubCommands {
         #[structopt(short = "-p", long = "percent")]
         percent: f64
     },
+    #[structopt(name = "query", about = "query")]
+    #[structopt(setting(clap::AppSettings::ColoredHelp))]
+    Query {
+        #[structopt(short = "q", long = "query_gene_id")]
+        gene_id: String,
+        #[structopt(short = "-i", long = "input_graph")]
+        input_graph: PathBuf,
+        #[structopt(short = "d", long = "depth")]
+        depth: Option<usize>,
+        #[structopt(long = "rank_cutoff")]
+        rank_cutoff: Option<f64>,
+        #[structopt(long = "pcc_cutoff")]
+        pcc_cutoff: Option<f64>
+    }
 }
 
 fn main() -> Result<()> {
@@ -156,6 +174,20 @@ fn main() -> Result<()> {
                 input_fasta,
                 percent
             )?;
+        },
+        SubCommands::Query {
+            gene_id,
+            input_graph,
+            depth,
+            rank_cutoff,
+            pcc_cutoff
+        } => {
+            handlers::query::parse_args(
+                gene_id, 
+                input_graph,
+                depth.unwrap_or(1), 
+                pcc_cutoff.as_ref(),
+                rank_cutoff.as_ref())?;
         }
     }
     Ok(())
