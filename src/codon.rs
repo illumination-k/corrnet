@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
 use anyhow::Result;
 use ndarray::{Array2, ArrayBase};
 use ndarray_stats::*;
+use std::collections::BTreeMap;
 
 use crate::rank;
 
@@ -9,12 +9,13 @@ fn make_codon_map() -> BTreeMap<String, usize> {
     let nuc = vec!['A', 'G', 'C', 'T'];
     let stop_codons = vec!["TGA", "TAA", "TAG"];
     let mut map: BTreeMap<String, usize> = BTreeMap::new();
-    
     for n1 in nuc.iter() {
         for n2 in nuc.iter() {
             for n3 in nuc.iter() {
                 let codon = format!("{}{}{}", n1, n2, n3);
-                if stop_codons.contains(&codon.as_ref()) { continue; }
+                if stop_codons.contains(&codon.as_ref()) {
+                    continue;
+                }
                 map.entry(codon).or_insert(0);
             }
         }
@@ -23,27 +24,23 @@ fn make_codon_map() -> BTreeMap<String, usize> {
     map
 }
 
-fn make_codon_vec(
-    seq: &str,
-) -> Vec<usize> {
+fn make_codon_vec(seq: &str) -> Vec<usize> {
     let mut codon_map = make_codon_map();
-    
+
     let seq: Vec<char> = seq.to_uppercase().chars().collect();
 
-    for i in (0..seq.len()-3).step_by(3) {
-        let codon: String = seq[i..i+3].into_iter().collect();
+    for i in (0..seq.len() - 3).step_by(3) {
+        let codon: String = seq[i..i + 3].into_iter().collect();
         match codon_map.get_mut(&codon) {
             Some(i) => *i += 1,
-            None => continue
+            None => continue,
         }
     }
 
     codon_map.into_iter().map(|(_, x)| x).collect()
 }
 
-fn make_codon_arr(
-    seqs: &Vec<String>
-) -> Result<Array2<usize>> {
+fn make_codon_arr(seqs: &Vec<String>) -> Result<Array2<usize>> {
     const CODON_SIZE: usize = 61;
     let seq_len = seqs.len();
 

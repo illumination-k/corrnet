@@ -2,10 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 
-
-pub fn parse_args(
-    in_graph: &PathBuf,
-    rank_cutoff: Option<&f64>,
-) -> Result<()> {
+#[allow(dead_code)]
+pub fn parse_args(_in_graph: &PathBuf, _rank_cutoff: Option<&f64>) -> Result<()> {
     Ok(())
 }
