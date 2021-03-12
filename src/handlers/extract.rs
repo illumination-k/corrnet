@@ -1,11 +1,10 @@
-use std::path::PathBuf;
 use std::collections::HashSet;
+use std::path::PathBuf;
 
-use csv::{Reader, Writer};
 use anyhow::Result;
+use csv::{Reader, Writer};
 
 use crate::io;
-
 
 pub fn parse_args(
     input: &PathBuf,
@@ -31,12 +30,12 @@ pub fn parse_args(
     };
 
     while rdr.read_byte_record(&mut raw_record)? {
-    // for _r in rdr.deserialize() {
+        // for _r in rdr.deserialize() {
         let r: io::ByteCsvRecord = raw_record.deserialize(Some(&headers))?;
 
         // filter by gene ids
-        let (gene_1, gene_2) =  r.genes_unchecked();
-        
+        let (gene_1, gene_2) = r.genes_unchecked();
+
         if let Some(gene_set) = gene_set.as_ref() {
             if !(gene_set.contains(&gene_1) || gene_set.contains(&gene_2)) {
                 continue;
@@ -46,13 +45,17 @@ pub fn parse_args(
         // filter by rank
         if let Some(rank_cutoff) = rank_cutoff {
             let rank = r.rank();
-            if *rank_cutoff < rank { continue; }
+            if *rank_cutoff < rank {
+                continue;
+            }
         }
 
         // filter by pcc
         if let Some(pcc_cutoff) = pcc_cutoff {
             let pcc = r.corr();
-            if pcc < *pcc_cutoff { continue; }
+            if pcc < *pcc_cutoff {
+                continue;
+            }
         }
 
         wtr.serialize(r)?;

@@ -27,46 +27,55 @@ pub fn parse_args(
             }
 
             if let Some(pcc_cutoff) = pcc_cutoff {
-                if record.corr() < *pcc_cutoff { continue; }
+                if record.corr() < *pcc_cutoff {
+                    continue;
+                }
             }
 
             if let Some(rank_cutoff) = rank_cutoff {
-                if record.rank() > *rank_cutoff { continue; }
+                if record.rank() > *rank_cutoff {
+                    continue;
+                }
             }
             let byte_rec = io::CsvRecord::from_byte_records(&record);
             wtr.serialize(byte_rec)?;
         }
 
         wtr.flush()?;
-        return Ok(())
+        return Ok(());
     }
 
     // 一端全部読み込むけど、pccとかrankとかがダメな奴は無視していいはず
     // とりあえずhashmapのグラフでdfsか
     let mut graph: HashMap<String, HashMap<String, (f64, f64)>> = HashMap::new();
-    
+
     while rdr.read_byte_record(&mut raw_record)? {
         let record: io::ByteCsvRecord = raw_record.deserialize(Some(&headers))?;
 
-
         if let Some(pcc_cutoff) = pcc_cutoff {
-            if record.corr() < *pcc_cutoff { continue; }
+            if record.corr() < *pcc_cutoff {
+                continue;
+            }
         }
 
         if let Some(rank_cutoff) = rank_cutoff {
-            if record.rank() > *rank_cutoff { continue; }
+            if record.rank() > *rank_cutoff {
+                continue;
+            }
         }
-        
+
         let (gene_1, gene_2) = record.genes_unchecked();
 
         graph.entry(gene_1.clone()).or_insert(HashMap::new());
-        graph.get_mut(&gene_1)
+        graph
+            .get_mut(&gene_1)
             .unwrap()
             .entry(gene_2.clone())
             .or_insert((record.corr(), record.rank()));
 
         graph.entry(gene_2.clone()).or_insert(HashMap::new());
-        graph.get_mut(&gene_2)
+        graph
+            .get_mut(&gene_2)
             .unwrap()
             .entry(gene_1)
             .or_insert((record.corr(), record.rank()));
@@ -88,18 +97,22 @@ fn dfs(
     depth: usize,
     depth_limit: usize,
     edges: &mut Vec<(String, String, f64, f64)>,
-    graph: &HashMap<String, HashMap<String, (f64, f64)>>
+    graph: &HashMap<String, HashMap<String, (f64, f64)>>,
 ) {
-    if depth == depth_limit { return; }
+    if depth == depth_limit {
+        return;
+    }
     let map = match graph.get(query) {
         Some(map) => map,
-        None => return
+        None => return,
     };
 
     for k in map.keys() {
         let (corr, rank) = match map.get(k) {
-            Some((corr, rank)) => { (corr, rank) },
-            None => {continue;}
+            Some((corr, rank)) => (corr, rank),
+            None => {
+                continue;
+            }
         };
         edges.push((query.clone(), k.clone(), *corr, *rank));
         dfs(k, depth + 1, depth_limit, edges, graph);
@@ -118,15 +131,18 @@ pub mod test {
             ("gene_1", "gene_2", 1., 1.),
             ("gene_1", "gene_3", 1., 1.),
             ("gene_2", "gene_6", 1., 1.),
-            ("gene_3", "gene_4", 1., 1.,),
-            ("gene_4", "gene_5", 1., 1.,),
+            ("gene_3", "gene_4", 1., 1.),
+            ("gene_4", "gene_5", 1., 1.),
         ];
 
         let mut graph: HashMap<String, HashMap<String, (f64, f64)>> = HashMap::new();
 
         for edge in edges.iter() {
-            graph.entry(edge.0.to_string()).or_insert(HashMap::new())
-                .entry(edge.1.to_string()).or_insert((edge.2, edge.3));
+            graph
+                .entry(edge.0.to_string())
+                .or_insert(HashMap::new())
+                .entry(edge.1.to_string())
+                .or_insert((edge.2, edge.3));
         }
 
         let mut dfs_edges = vec![];
@@ -136,11 +152,12 @@ pub mod test {
             ("gene_1", "gene_2", 1., 1.),
             ("gene_1", "gene_3", 1., 1.),
             ("gene_2", "gene_6", 1., 1.),
-            ("gene_3", "gene_4", 1., 1.,)
-        ].iter()
-            .map(|(g1, g2, corr, rank)| (g1.to_string(), g2.to_string(), *corr, *rank))
-            .collect();
-        
+            ("gene_3", "gene_4", 1., 1.),
+        ]
+        .iter()
+        .map(|(g1, g2, corr, rank)| (g1.to_string(), g2.to_string(), *corr, *rank))
+        .collect();
+
         for edge in dfs_edges.iter() {
             assert!(ans.contains(edge))
         }
