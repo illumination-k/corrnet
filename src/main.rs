@@ -20,10 +20,6 @@ use std::path::PathBuf;
 use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
 
-#[cfg(test)]
-#[macro_use]
-extern crate maplit;
-
 mod io;
 mod graph;
 mod codon;
@@ -72,6 +68,10 @@ pub enum SubCommands {
         method: Option<Rank>,
         #[structopt(short = "-o", long = "output")]
         output: Option<PathBuf>,
+        #[structopt(long = "log2")]
+        log2: bool,
+        #[structopt(long = "pseudocount", default_value="1.")]
+        pseude_count: f64,
         #[structopt(long = "rank_cutoff")]
         rank_cutoff: Option<usize>,
         #[structopt(long = "pcc_cutoff")]
@@ -138,6 +138,8 @@ fn main() -> Result<()> {
             input,
             output,
             method,
+            log2,
+            pseude_count,
             rank_cutoff,
             pcc_cutoff
         } => {
@@ -145,6 +147,8 @@ fn main() -> Result<()> {
                 input, 
                 output.as_ref(), 
                 method.as_ref(),
+                log2,
+                pseude_count,
                 rank_cutoff.as_ref(),
                 pcc_cutoff.as_ref(),
             )?;

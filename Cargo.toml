@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 structopt = "0.3"
 bio = "*"
-petgraph = "0.6.0"
 ndarray = { version = "0.14.0", features = ["approx"] }
 ndarray-stats = "0.4"
 csv = "1.1"

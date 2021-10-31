@@ -40,20 +40,6 @@ pub fn read_exp_csv<P: AsRef<Path>>(
     Ok(ArrayBase::from_shape_vec(shape, vec)?)
 }
 
-// pub fn read_graph_csv<P, T>(p: P) -> Result<graph::Graph<T>> 
-//     where P: AsRef<Path>, T: Clone + Copy + Debug + FromStr + Display, <T as FromStr>::Err: std::fmt::Debug
-// {
-//     let mut rdr = Reader::from_path(p)?;
-//     let mut records: Vec<CsvRecord> = vec![];
-
-//     for _r in rdr.deserialize() {
-//         let r: CsvRecord = _r?;
-//         records.push(r)
-//     }
-
-//     Ok(graph::Graph::from_records(&records))
-// }
-
 pub fn read_gene_list<P: AsRef<Path>>(p: &P) -> Result<HashSet<String>> {
     let mut rdr = Reader::from_path(p)?;
 
@@ -117,6 +103,7 @@ impl CsvRecord {
         (self.gene_1.clone(), self.gene_2.clone())
     }
 
+    #[allow(dead_code)]
     pub fn corr(&self) -> f64 {
         self.corr
     }

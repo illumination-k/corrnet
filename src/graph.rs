@@ -103,13 +103,14 @@ impl<T> Graph<T>
         }
     }
 
+    #[allow(dead_code)]
     pub fn from_edges(nodes: &Vec<String>, edges: &Vec<Edge<T>>) -> Self {
         let mut g = Graph::new(nodes);
         for edge in edges.iter() {
             g.push(edge.clone())
         }
         g
-     }
+    }
 
     fn push(&mut self, edge: Edge<T>) {
         let query = edge.query();
@@ -134,36 +135,6 @@ impl<T> Graph<T>
         return edges
     }
 }
-
-// impl<T> Graph<T>
-//     where T: Clone + Copy + FromStr + Debug + Display
-// {
-//     pub fn from_records(records: &Vec<io::CsvRecord>) -> Self
-//         where <T as FromStr>::Err: std::fmt::Debug
-//     {
-//         let mut nodes: Vec<String> = vec![];
-//         let mut edges: Vec<Edge<T>> = vec![];
-
-//         let mut cnt = 0;
-//         let mut map: HashMap<String, usize> = HashMap::new();
-
-//         for r in records.iter() {
-//             let (gene_1, gene_2) = r.genes();
-//             let corr = r.corr();
-//             let rank = r.rank::<T>();
-
-//             let node_1 = get_node_index(&gene_1, &mut nodes, &mut map, &mut cnt);
-//             let node_2 = get_node_index(&gene_2, &mut nodes, &mut map, &mut cnt);
-//             edges.push(Edge::new(node_1, node_2, corr, rank));
-//         }
-
-//         Self {
-//             edges,
-//             nodes
-//         }
-//     }
-// }
-
 
 impl<T> Graph<T>
     where T: Clone + Copy + Ord + Display

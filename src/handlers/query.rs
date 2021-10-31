@@ -75,6 +75,7 @@ pub fn parse_args(
     Ok(())
 }
 
+#[allow(dead_code)]
 fn dfs(
     query: &String,
     depth: usize,
@@ -93,9 +94,4 @@ fn dfs(
         edges.push((query.clone(), k.clone(), *corr, *rank));
         dfs(k, depth + 1, depth_limit, edges, graph);
     }
-}
-
-#[cfg(test)]
-pub mod test {
-    use super::dfs;
 }

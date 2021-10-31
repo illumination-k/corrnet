@@ -13,15 +13,21 @@ pub fn parse_args(
     input: &PathBuf, 
     output: Option<&PathBuf>,
     method: Option<&Rank>,
+    log2: &bool,
+    psede_count: &f64,
     rank_cutoff: Option<&usize>,
     pcc_cutoff: Option<&f64>,
 ) -> Result<()> {
     info!("--- start read {}  ---", input.as_path().to_str().unwrap());
+    info!("log2 transform: {}, psede_count: {}", log2, psede_count);
 
     // read csv and make ndarray::Array2
     let mut index: Vec<String> = vec![];
     
-    let arr = io::read_exp_csv(input, &mut index)?;
+    let mut arr = io::read_exp_csv(input, &mut index)?;
+    if *log2 {
+        arr = arr.mapv(|x| (x + psede_count).log2());
+    }
 
     // calc correlation
     let corr = arr.pearson_correlation()?;
