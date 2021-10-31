@@ -28,6 +28,7 @@ pub fn parse_args(
     if *log2 {
         arr = arr.mapv(|x| (x + psede_count).log2());
     }
+    debug!("exp_matrix: \n{:?}", arr);
 
     // calc correlation
     let corr = arr.pearson_correlation()?;
