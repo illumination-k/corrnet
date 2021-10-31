@@ -37,7 +37,6 @@ pub fn read_exp_csv<P: AsRef<Path>>(
         
     }
     info!("shape: {:?}", shape);
-    info!("calculate pearson correlation...");
     Ok(ArrayBase::from_shape_vec(shape, vec)?)
 }
 
