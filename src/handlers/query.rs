@@ -27,46 +27,55 @@ pub fn parse_args(
             }
 
             if let Some(pcc_cutoff) = pcc_cutoff {
-                if record.corr() < *pcc_cutoff { continue; }
+                if record.corr() < *pcc_cutoff {
+                    continue;
+                }
             }
 
             if let Some(rank_cutoff) = rank_cutoff {
-                if record.rank() > *rank_cutoff { continue; }
+                if record.rank() > *rank_cutoff {
+                    continue;
+                }
             }
 
             wtr.serialize(record)?;
         }
 
         wtr.flush()?;
-        return Ok(())
+        return Ok(());
     }
 
     // 一端全部読み込むけど、pccとかrankとかがダメな奴は無視していいはず
     // とりあえずhashmapのグラフでdfsか
     let mut graph: HashMap<String, HashMap<String, (f64, f64)>> = HashMap::new();
-    
+
     while rdr.read_byte_record(&mut raw_record)? {
         let record: io::ByteCsvRecord = raw_record.deserialize(Some(&headers))?;
 
-
         if let Some(pcc_cutoff) = pcc_cutoff {
-            if record.corr() < *pcc_cutoff { continue; }
+            if record.corr() < *pcc_cutoff {
+                continue;
+            }
         }
 
         if let Some(rank_cutoff) = rank_cutoff {
-            if record.rank() > *rank_cutoff { continue; }
+            if record.rank() > *rank_cutoff {
+                continue;
+            }
         }
-        
+
         let (gene_1, gene_2) = record.genes_unchecked();
 
         graph.entry(gene_1.clone()).or_insert(HashMap::new());
-        graph.get_mut(&gene_1)
+        graph
+            .get_mut(&gene_1)
             .unwrap()
             .entry(gene_2.clone())
             .or_insert((record.corr(), record.rank()));
 
         graph.entry(gene_2.clone()).or_insert(HashMap::new());
-        graph.get_mut(&gene_2)
+        graph
+            .get_mut(&gene_2)
             .unwrap()
             .entry(gene_1)
             .or_insert((record.corr(), record.rank()));
@@ -81,12 +90,14 @@ fn dfs(
     depth: usize,
     depth_limit: usize,
     edges: &mut Vec<(String, String, f64, f64)>,
-    graph: &HashMap<String, HashMap<String, (f64, f64)>>
+    graph: &HashMap<String, HashMap<String, (f64, f64)>>,
 ) {
-    if depth == depth_limit { return; }
+    if depth == depth_limit {
+        return;
+    }
     let map = match graph.get(query) {
         Some(map) => map,
-        None => return
+        None => return,
     };
 
     for k in map.keys() {

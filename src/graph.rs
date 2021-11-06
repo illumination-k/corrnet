@@ -1,24 +1,26 @@
-use std::fmt::{Display, Debug};
-use ndarray::{Array2};
+use ndarray::Array2;
+use std::fmt::{Debug, Display};
 
 use crate::io;
 use crate::rank;
 
 #[derive(Debug, Clone)]
 pub struct Node<T>
-    where T: Clone + Copy
+where
+    T: Clone + Copy,
 {
     node_name: String,
     edges: Vec<Edge<T>>,
 }
 
 impl<T> Node<T>
-    where T: Clone + Copy
+where
+    T: Clone + Copy,
 {
     pub fn new(node_name: String) -> Self {
         Self {
             node_name: node_name,
-            edges: Vec::new()
+            edges: Vec::new(),
         }
     }
 
@@ -32,17 +34,18 @@ impl<T> Node<T>
 }
 
 impl<T> ToString for Node<T>
-    where T: Clone + Copy
+where
+    T: Clone + Copy,
 {
     fn to_string(&self) -> String {
         self.node_name.clone()
     }
 }
 
-
 #[derive(Debug, Clone, Copy)]
-pub struct Edge<T> 
-    where T: Clone + Copy
+pub struct Edge<T>
+where
+    T: Clone + Copy,
 {
     node_1: usize,
     node_2: usize,
@@ -50,34 +53,39 @@ pub struct Edge<T>
     rank: T,
 }
 
-impl<T> Edge<T> 
-    where T: Clone + Copy
+impl<T> Edge<T>
+where
+    T: Clone + Copy,
 {
     pub fn new(node_1: usize, node_2: usize, corr: f64, rank: T) -> Self {
         Self {
             node_1,
             node_2,
             corr,
-            rank
+            rank,
         }
     }
 
     pub fn query(&self) -> usize {
         self.node_1
     }
-    
+
     #[allow(dead_code)]
     pub fn target(&self) -> usize {
         self.node_2
     }
 
     pub fn node_names<S: ToString>(&self, nodes: &Vec<S>) -> (String, String) {
-        (nodes[self.node_1].to_string(), nodes[self.node_2].to_string())
+        (
+            nodes[self.node_1].to_string(),
+            nodes[self.node_2].to_string(),
+        )
     }
 }
 
 impl<T> Edge<T>
-    where T: Clone + Copy + ToString
+where
+    T: Clone + Copy + ToString,
 {
     pub fn to_record<S: ToString>(&self, nodes: &Vec<S>) -> io::CsvRecord {
         let (node_1_name, node_2_name) = self.node_names(nodes);
@@ -86,20 +94,22 @@ impl<T> Edge<T>
 }
 
 #[derive(Debug, Clone)]
-pub struct Graph<T> 
-    where T: Clone + Copy
+pub struct Graph<T>
+where
+    T: Clone + Copy,
 {
     // edges: Vec<Edge<T>>,
     nodes: Vec<Node<T>>,
 }
 
 impl<T> Graph<T>
-    where T: Clone + Copy
+where
+    T: Clone + Copy,
 {
     pub fn new(nodes: &Vec<String>) -> Self {
         Self {
             // edges: Vec::new(),
-            nodes: nodes.iter().map(|x| Node::new(x.clone())).collect()
+            nodes: nodes.iter().map(|x| Node::new(x.clone())).collect(),
         }
     }
 
@@ -132,12 +142,13 @@ impl<T> Graph<T>
             edges.extend(n.edges());
         }
 
-        return edges
+        return edges;
     }
 }
 
 impl<T> Graph<T>
-    where T: Clone + Copy + Ord + Display
+where
+    T: Clone + Copy + Ord + Display,
 {
     pub fn construct_hrr_network(
         &mut self,
@@ -148,15 +159,21 @@ impl<T> Graph<T>
     ) {
         for i in 0..self.size() {
             for j in i..self.size() {
-                if i == j { continue; }
+                if i == j {
+                    continue;
+                }
                 if let Some(pcc_cutoff) = pcc_cutoff {
-                    if f64::abs(corr[[i, j]]) < *pcc_cutoff { continue; }
+                    if f64::abs(corr[[i, j]]) < *pcc_cutoff {
+                        continue;
+                    }
                 }
 
                 let hrr = rank::hrr(rank[[i, j]], rank[[j, i]]);
 
                 if let Some(rank_cutoff) = rank_cutoff {
-                    if hrr > *rank_cutoff { continue; }
+                    if hrr > *rank_cutoff {
+                        continue;
+                    }
                 }
                 self.push(Edge::new(i, j, corr[[i, j]], hrr))
             }
@@ -165,7 +182,8 @@ impl<T> Graph<T>
 }
 
 impl<T> Graph<T>
-    where T: num_traits::Float + Display
+where
+    T: num_traits::Float + Display,
 {
     pub fn construct_mr_network<R: num_traits::NumCast + Copy>(
         &mut self,
@@ -176,17 +194,26 @@ impl<T> Graph<T>
     ) {
         for i in 0..self.size() {
             for j in i..self.size() {
-                if i == j { continue; }
+                if i == j {
+                    continue;
+                }
                 // construct network with rank::mr
                 if let Some(pcc_cutoff) = pcc_cutoff {
-                    if f64::abs(corr[[i, j]]) < *pcc_cutoff { continue; }
+                    if f64::abs(corr[[i, j]]) < *pcc_cutoff {
+                        continue;
+                    }
                 }
-                let mr = rank::mr(T::from(rank[[i, j]]).unwrap(), T::from(rank[[j, i]]).unwrap());
-                
+                let mr = rank::mr(
+                    T::from(rank[[i, j]]).unwrap(),
+                    T::from(rank[[j, i]]).unwrap(),
+                );
+
                 if let Some(rank_cutoff) = rank_cutoff {
-                    if mr > *rank_cutoff { continue; }
+                    if mr > *rank_cutoff {
+                        continue;
+                    }
                 }
-                
+
                 self.push(Edge::new(i, j, corr[[i, j]], mr));
             }
         }

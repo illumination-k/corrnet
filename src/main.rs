@@ -1,10 +1,10 @@
 extern crate anyhow;
-extern crate csv;
 extern crate bio;
-extern crate pretty_env_logger;
+extern crate csv;
 extern crate ndarray;
 extern crate ndarray_stats;
 extern crate num_traits;
+extern crate pretty_env_logger;
 
 #[macro_use]
 extern crate log;
@@ -14,22 +14,22 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-use std::{env::set_var};
+use std::env::set_var;
 use std::path::PathBuf;
 
-use structopt::{clap, StructOpt, clap::arg_enum};
 use anyhow::Result;
+use structopt::{clap, clap::arg_enum, StructOpt};
 
-mod io;
-mod graph;
 mod codon;
-mod similarity;
-mod rank;
+mod graph;
 mod handlers;
+mod io;
 mod math;
+mod rank;
+mod similarity;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "hrr_corrnet")]
+#[structopt(name = "corrnet")]
 #[structopt(long_version(option_env!("LONG_VERSION").unwrap_or(env!("CARGO_PKG_VERSION"))))]
 #[structopt(setting(clap::AppSettings::ColoredHelp))]
 pub struct Opt {
@@ -59,7 +59,10 @@ arg_enum! {
 
 #[derive(Debug, StructOpt)]
 pub enum SubCommands {
-    #[structopt(name = "construct", about="construct rank based network from gene expression matrix")]
+    #[structopt(
+        name = "construct",
+        about = "construct rank based network from gene expression matrix"
+    )]
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     Construct {
         #[structopt(short = "-i", long = "input")]
@@ -70,14 +73,14 @@ pub enum SubCommands {
         output: Option<PathBuf>,
         #[structopt(long = "log2")]
         log2: bool,
-        #[structopt(long = "pseudocount", default_value="1.")]
+        #[structopt(long = "pseudocount", default_value = "1.")]
         pseude_count: f64,
         #[structopt(long = "rank_cutoff")]
         rank_cutoff: Option<usize>,
         #[structopt(long = "pcc_cutoff")]
-        pcc_cutoff: Option<f64>
+        pcc_cutoff: Option<f64>,
     },
-    #[structopt(name = "extract", about="extract")]
+    #[structopt(name = "extract", about = "extract")]
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     Extract {
         #[structopt(short = "-i", long = "input")]
@@ -89,17 +92,17 @@ pub enum SubCommands {
         #[structopt(long = "rank_cutoff")]
         rank_cutoff: Option<f64>,
         #[structopt(long = "pcc_cutoff")]
-        pcc_cutoff: Option<f64>
+        pcc_cutoff: Option<f64>,
     },
-    #[structopt(name = "codon_usage", about="extract")]
+    #[structopt(name = "codon_usage", about = "calculate codon score")]
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     CodonUsage {
         #[structopt(short = "-i", long = "input_graph")]
         input_graph: PathBuf,
         #[structopt(short = "-f", long = "input_fasta")]
         input_fasta: PathBuf,
-        #[structopt(short = "-p", long = "percent")]
-        percent: f64
+        #[structopt(short = "-p", long = "percent", default_value = "0.1")]
+        percent: f64,
     },
     #[structopt(name = "query", about = "query")]
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
@@ -113,23 +116,21 @@ pub enum SubCommands {
         #[structopt(long = "rank_cutoff")]
         rank_cutoff: Option<f64>,
         #[structopt(long = "pcc_cutoff")]
-        pcc_cutoff: Option<f64>
-    }
+        pcc_cutoff: Option<f64>,
+    },
 }
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
 
     match &opt.log_level {
-        Some(log_level) => {
-            match log_level {
-                LogLevel::DEBUG => set_var("RUST_LOG", "debug"),
-                LogLevel::INFO => set_var("RUST_LOG", "info"),
-                LogLevel::WARN => set_var("RUST_LOG", "warn"),
-                LogLevel::ERROR => set_var("RUST_LOG", "error")
-            }
+        Some(log_level) => match log_level {
+            LogLevel::DEBUG => set_var("RUST_LOG", "debug"),
+            LogLevel::INFO => set_var("RUST_LOG", "info"),
+            LogLevel::WARN => set_var("RUST_LOG", "warn"),
+            LogLevel::ERROR => set_var("RUST_LOG", "error"),
         },
-        None => set_var("RUST_LOG", "warn")
+        None => set_var("RUST_LOG", "warn"),
     };
     pretty_env_logger::init_timed();
 
@@ -141,57 +142,54 @@ fn main() -> Result<()> {
             log2,
             pseude_count,
             rank_cutoff,
-            pcc_cutoff
+            pcc_cutoff,
         } => {
             handlers::construct::parse_args(
-                input, 
-                output.as_ref(), 
+                input,
+                output.as_ref(),
                 method.as_ref(),
                 log2,
                 pseude_count,
                 rank_cutoff.as_ref(),
                 pcc_cutoff.as_ref(),
             )?;
-        },
+        }
         SubCommands::Extract {
             input,
             gene_list,
             output,
             rank_cutoff,
-            pcc_cutoff
+            pcc_cutoff,
         } => {
             handlers::extract::parse_args(
-                input, 
-                gene_list.as_ref(), 
-                output.as_ref(), 
-                rank_cutoff.as_ref(), 
-                pcc_cutoff.as_ref()
+                input,
+                gene_list.as_ref(),
+                output.as_ref(),
+                rank_cutoff.as_ref(),
+                pcc_cutoff.as_ref(),
             )?;
-        },
+        }
         SubCommands::CodonUsage {
             input_graph,
             input_fasta,
-            percent
+            percent,
         } => {
-            handlers::codon_usage::parse_args(
-                input_graph,
-                input_fasta,
-                percent
-            )?;
-        },
+            handlers::codon_usage::parse_args(input_graph, input_fasta, percent)?;
+        }
         SubCommands::Query {
             gene_id,
             input_graph,
             depth,
             rank_cutoff,
-            pcc_cutoff
+            pcc_cutoff,
         } => {
             handlers::query::parse_args(
-                gene_id, 
+                gene_id,
                 input_graph,
-                depth.unwrap_or(1), 
+                depth.unwrap_or(1),
                 pcc_cutoff.as_ref(),
-                rank_cutoff.as_ref())?;
+                rank_cutoff.as_ref(),
+            )?;
         }
     }
     Ok(())
