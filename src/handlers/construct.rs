@@ -2,6 +2,7 @@ use anyhow::Result;
 use ndarray::Array2;
 use ndarray_stats::*;
 use std::path::PathBuf;
+// use ndarray::parallel::prelude::*;
 
 use crate::graph::Graph;
 use crate::io;
@@ -25,7 +26,7 @@ pub fn parse_args(
 
     let mut arr = io::read_exp_csv(input, &mut index)?;
     if *log2 {
-        arr = arr.mapv(|x| (x + psede_count).log2());
+        arr.par_mapv_inplace(|x| (x + psede_count).log2());
     }
     debug!("exp_matrix: \n{:?}", arr);
 

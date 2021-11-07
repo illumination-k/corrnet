@@ -94,7 +94,7 @@ pub enum SubCommands {
         #[structopt(long = "pcc_cutoff")]
         pcc_cutoff: Option<f64>,
     },
-    #[structopt(name = "codon_usage", about = "calculate codon score")]
+    #[structopt(name = "codon-usage", about = "calculate codon score")]
     #[structopt(setting(clap::AppSettings::ColoredHelp))]
     CodonUsage {
         #[structopt(short = "-i", long = "input_graph")]
@@ -117,6 +117,20 @@ pub enum SubCommands {
         rank_cutoff: Option<f64>,
         #[structopt(long = "pcc_cutoff")]
         pcc_cutoff: Option<f64>,
+    },
+    #[structopt(name = "merge", about = "merge network")]
+    #[structopt(setting(clap::AppSettings::ColoredHelp))]
+    Merge {
+        #[structopt(long = "hrr")]
+        hrr_path: PathBuf,
+        #[structopt(long = "mr")]
+        mr_path: PathBuf,
+        #[structopt(long = "outpath", short = "-o", default_value = "merge_graph.csv.gz")]
+        out_path: PathBuf,
+        #[structopt(long = "priority", possible_values(&Rank::variants()))]
+        priority: Rank,
+        #[structopt(long = "max-rank", default_value = "2000")]
+        max_rank: f64,
     },
 }
 
@@ -190,6 +204,15 @@ fn main() -> Result<()> {
                 pcc_cutoff.as_ref(),
                 rank_cutoff.as_ref(),
             )?;
+        }
+        SubCommands::Merge {
+            hrr_path,
+            mr_path,
+            out_path,
+            priority,
+            max_rank,
+        } => {
+            handlers::merge::parse_args(hrr_path, mr_path, out_path, priority, max_rank)?;
         }
     }
     Ok(())

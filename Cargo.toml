@@ -19,7 +19,7 @@ superslice = "*"
 ordered-float = "2.0"
 itertools = "*"
 approx = "*"
-flate2 = { version = "0.2", features = ["tokio"] }
+flate2 = { version = "1.0.22", features = ["tokio"] }
 serde = "1"
 serde_derive = "1"
 num-traits = "*"

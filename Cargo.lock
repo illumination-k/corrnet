@@ -250,12 +250,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cc"
-version = "1.0.66"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
-
-[[package]]
 name = "cfg-if"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -309,7 +303,7 @@ dependencies = [
  "approx 0.4.0",
  "bio",
  "csv",
- "flate2 0.2.20",
+ "flate2",
  "itertools 0.10.1",
  "log",
  "maplit",
@@ -514,26 +508,16 @@ checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
 name = "flate2"
-version = "0.2.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6234dd4468ae5d1e2dbb06fe2b058696fdc50a339c68a393aefbf00bc81e423"
-dependencies = [
- "futures",
- "libc",
- "miniz-sys",
- "tokio-io",
-]
-
-[[package]]
-name = "flate2"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e6988e897c1c9c485f43b47a529cef42fde0547f9d8d41a7062518f1d8fc53f"
 dependencies = [
  "cfg-if 1.0.0",
  "crc32fast",
+ "futures",
  "libc",
  "miniz_oxide",
+ "tokio-io",
 ]
 
 [[package]]
@@ -828,16 +812,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "miniz-sys"
-version = "0.1.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e9e3ae51cea1576ceba0dde3d484d30e6e5b86dee0b2d412fe3a16a15c98202"
-dependencies = [
- "cc",
- "libc",
-]
-
-[[package]]
 name = "miniz_oxide"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1124,7 +1098,7 @@ dependencies = [
  "arrow2",
  "csv-core",
  "dirs 3.0.2",
- "flate2 1.0.22",
+ "flate2",
  "lazy_static",
  "lexical",
  "memchr",
