@@ -142,7 +142,7 @@ where
             edges.extend(n.edges());
         }
 
-        return edges;
+        edges
     }
 }
 

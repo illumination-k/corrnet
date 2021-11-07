@@ -66,8 +66,8 @@ pub fn parse_args(
     max_rank: &f64,
 ) -> Result<()> {
     info!(
-        "\n hrr graph path: {:?}\n mr graph path: {:?}\n priority rank: {}, max rank: {}",
-        hrr_path, mr_path, priority, max_rank
+        "\n hrr graph path: {:?}\n mr graph path: {:?}\n out_path: {:?}\n priority rank: {}, max rank: {}",
+        hrr_path, mr_path, out_path, priority, max_rank
     );
 
     let mut hrr_df = read_graph_by_poloars(hrr_path, &Rank::HRR)?;

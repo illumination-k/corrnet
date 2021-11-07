@@ -23,7 +23,6 @@ use structopt::{clap, clap::arg_enum, StructOpt};
 mod codon;
 mod graph;
 mod handlers;
-mod construct_network;
 mod io;
 mod math;
 mod rank;
