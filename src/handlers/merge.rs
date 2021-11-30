@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, fs::File, path::PathBuf};
+use std::{ffi::OsStr, fs::File, path::Path};
 
 use anyhow::Result;
 use flate2::{Compression, GzBuilder};
@@ -6,7 +6,7 @@ use polars::prelude::*;
 
 use crate::Rank;
 
-fn read_graph_by_poloars(path: &PathBuf, rank: &Rank) -> Result<DataFrame> {
+fn read_graph_by_poloars(path: &Path, rank: &Rank) -> Result<DataFrame> {
     let schema = Schema::new(vec![
         Field::new("gene_1", DataType::Utf8),
         Field::new("gene_2", DataType::Utf8),
@@ -32,7 +32,7 @@ fn read_graph_by_poloars(path: &PathBuf, rank: &Rank) -> Result<DataFrame> {
 fn add_relation(df: &mut DataFrame) -> Result<()> {
     let gene1chunk = df.column("gene_1")?.utf8()?;
     // Either ownership is required for add op with "-"
-    let gene2chunk = df.column("gene_2")?.utf8()?.to_owned();
+    let gene2chunk = df.column("gene_2")?.utf8()?;
     let genechunk = gene1chunk + "-" + gene2chunk.to_owned();
     df.replace_or_add("relation", genechunk.into_series())?;
     Ok(())
@@ -59,9 +59,9 @@ fn filterout_by_rank_and_merge(
 }
 
 pub fn parse_args(
-    hrr_path: &PathBuf,
-    mr_path: &PathBuf,
-    out_path: &PathBuf,
+    hrr_path: &Path,
+    mr_path: &Path,
+    out_path: &Path,
     priority: &Rank,
     max_rank: &f64,
 ) -> Result<()> {

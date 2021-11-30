@@ -1,7 +1,7 @@
 use anyhow::Result;
 use csv::Reader;
 use ordered_float::OrderedFloat;
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::Path};
 
 use crate::codon;
 use crate::io;
@@ -9,7 +9,7 @@ use crate::math;
 use crate::rank;
 use crate::similarity;
 
-pub fn parse_args(input_graph: &PathBuf, input_fasta: &PathBuf, percent: &f64) -> Result<()> {
+pub fn parse_args(input_graph: &Path, input_fasta: &Path, percent: &f64) -> Result<()> {
     info!("start caluculate coden score...");
 
     info!("start read fasta...");
@@ -29,9 +29,11 @@ pub fn parse_args(input_graph: &PathBuf, input_fasta: &PathBuf, percent: &f64) -
         let (gene_1, gene_2) = r.genes();
         let rank = OrderedFloat::from(r.rank::<f64>());
         map.entry(gene_1.clone())
-            .or_insert(Vec::new())
+            .or_insert_with(Vec::new)
             .push((gene_2.clone(), rank));
-        map.entry(gene_2).or_insert(Vec::new()).push((gene_1, rank));
+        map.entry(gene_2)
+            .or_insert_with(Vec::new)
+            .push((gene_1, rank));
     }
 
     let corr_index_cnt = map.keys().count();
@@ -71,7 +73,7 @@ pub fn parse_args(input_graph: &PathBuf, input_fasta: &PathBuf, percent: &f64) -
 
 fn sort_corr_by_rank(
     map: &mut HashMap<String, Vec<(String, OrderedFloat<f64>)>>,
-    key: &String,
+    key: &str,
 ) -> Option<Vec<String>> {
     let corr_ranked = match map.get_mut(key) {
         Some(v) => v,

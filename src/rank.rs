@@ -35,7 +35,7 @@ pub fn construct_rank_matrix(corr: &Array2<f64>, size: usize) -> Result<Array2<u
 pub fn get_index_sorted_by_rank(
     rank_matrix: &Array2<usize>,
     i: usize,
-    index: &Vec<String>,
+    index: &[String],
 ) -> Vec<String> {
     let mut rank_vec: Vec<String> = vec!["".to_string(); index.len() - 1];
 

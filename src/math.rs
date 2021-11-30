@@ -1,20 +1,20 @@
 use ordered_float::OrderedFloat;
 
-pub fn mean(list: &Vec<f64>) -> f64 {
+pub fn mean(list: &[f64]) -> f64 {
     list.iter().sum::<f64>() / list.len() as f64
 }
 
-pub fn var(list: &Vec<f64>, ddof: f64) -> f64 {
+pub fn var(list: &[f64], ddof: f64) -> f64 {
     let mean = mean(list);
     list.iter().map(|x| (x - mean).powi(2i32)).sum::<f64>() / (list.len() as f64 - ddof)
 }
 
-pub fn std(list: &Vec<f64>, ddof: f64) -> f64 {
+pub fn std(list: &[f64], ddof: f64) -> f64 {
     var(list, ddof).sqrt()
 }
 
-pub fn median(list: &Vec<f64>) -> f64 {
-    assert!(list.len() > 0);
+pub fn median(list: &[f64]) -> f64 {
+    assert!(!list.is_empty());
     if list.len() == 1 {
         return list[0];
     }

@@ -6,8 +6,8 @@ use std::collections::BTreeMap;
 use crate::rank;
 
 fn make_codon_map() -> BTreeMap<String, usize> {
-    let nuc = vec!['A', 'G', 'C', 'T'];
-    let stop_codons = vec!["TGA", "TAA", "TAG"];
+    let nuc = &['A', 'G', 'C', 'T'];
+    let stop_codons = &["TGA", "TAA", "TAG"];
     let mut map: BTreeMap<String, usize> = BTreeMap::new();
 
     for n1 in nuc.iter() {
@@ -31,7 +31,7 @@ fn make_codon_vec(seq: &str) -> Vec<usize> {
     let seq: Vec<char> = seq.to_uppercase().chars().collect();
 
     for i in (0..seq.len() - 3).step_by(3) {
-        let codon: String = seq[i..i + 3].into_iter().collect();
+        let codon: String = seq[i..i + 3].iter().collect();
         match codon_map.get_mut(&codon) {
             Some(i) => *i += 1,
             None => continue,
@@ -41,7 +41,7 @@ fn make_codon_vec(seq: &str) -> Vec<usize> {
     codon_map.into_iter().map(|(_, x)| x).collect()
 }
 
-fn make_codon_arr(seqs: &Vec<String>) -> Result<Array2<usize>> {
+fn make_codon_arr(seqs: &[String]) -> Result<Array2<usize>> {
     const CODON_SIZE: usize = 61;
     let seq_len = seqs.len();
 
@@ -55,12 +55,12 @@ fn make_codon_arr(seqs: &Vec<String>) -> Result<Array2<usize>> {
     Ok(ArrayBase::from_shape_vec((seq_len, CODON_SIZE), vec)?)
 }
 
-fn make_codon_corr(seqs: &Vec<String>) -> Result<Array2<f64>> {
+fn make_codon_corr(seqs: &[String]) -> Result<Array2<f64>> {
     let codon_arr = make_codon_arr(seqs)?;
     Ok(codon_arr.mapv(|x| x as f64).pearson_correlation()?)
 }
 
-pub fn make_codon_rank(seqs: &Vec<String>) -> Result<Array2<usize>> {
+pub fn make_codon_rank(seqs: &[String]) -> Result<Array2<usize>> {
     let codon_corr = make_codon_corr(seqs)?;
     rank::construct_rank_matrix(&codon_corr, seqs.len())
 }

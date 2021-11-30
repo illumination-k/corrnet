@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use csv::{Reader, Writer};
@@ -7,7 +7,7 @@ use csv::{Reader, Writer};
 use crate::io;
 
 pub fn parse_args(
-    input: &PathBuf,
+    input: &Path,
     gene_list: Option<&PathBuf>,
     output: Option<&PathBuf>,
     rank_cutoff: Option<&f64>,

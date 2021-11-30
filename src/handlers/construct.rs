@@ -1,7 +1,7 @@
 use anyhow::Result;
 use ndarray::Array2;
 use ndarray_stats::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 // use ndarray::parallel::prelude::*;
 
 use crate::graph::Graph;
@@ -10,7 +10,7 @@ use crate::rank;
 use crate::Rank;
 
 pub fn parse_args(
-    input: &PathBuf,
+    input: &Path,
     output: Option<&PathBuf>,
     method: Option<&Rank>,
     log2: &bool,
@@ -18,7 +18,7 @@ pub fn parse_args(
     rank_cutoff: Option<&usize>,
     pcc_cutoff: Option<&f64>,
 ) -> Result<()> {
-    info!("--- start read {}  ---", input.as_path().to_str().unwrap());
+    info!("--- start read {}  ---", input.to_str().unwrap());
     info!("log2 transform: {}, psede_count: {}", log2, psede_count);
 
     // read csv and make ndarray::Array2

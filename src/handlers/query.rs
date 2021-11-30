@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::Path};
 
 use anyhow::Result;
 use csv::{Reader, Writer};
@@ -6,8 +6,8 @@ use csv::{Reader, Writer};
 use crate::io;
 
 pub fn parse_args(
-    gene_id: &String,
-    input_path: &PathBuf,
+    gene_id: &str,
+    input_path: &Path,
     depth: usize,
     pcc_cutoff: Option<&f64>,
     rank_cutoff: Option<&f64>,
@@ -66,14 +66,14 @@ pub fn parse_args(
 
         let (gene_1, gene_2) = record.genes_unchecked();
 
-        graph.entry(gene_1.clone()).or_insert(HashMap::new());
+        graph.entry(gene_1.to_string()).or_insert(HashMap::new());
         graph
             .get_mut(&gene_1)
             .unwrap()
-            .entry(gene_2.clone())
+            .entry(gene_2.to_string())
             .or_insert((record.corr(), record.rank()));
 
-        graph.entry(gene_2.clone()).or_insert(HashMap::new());
+        graph.entry(gene_2.to_string()).or_insert(HashMap::new());
         graph
             .get_mut(&gene_2)
             .unwrap()
@@ -86,7 +86,7 @@ pub fn parse_args(
 
 #[allow(dead_code)]
 fn dfs(
-    query: &String,
+    query: &str,
     depth: usize,
     depth_limit: usize,
     edges: &mut Vec<(String, String, f64, f64)>,
@@ -102,7 +102,7 @@ fn dfs(
 
     for k in map.keys() {
         let (corr, rank) = map.get(query).unwrap();
-        edges.push((query.clone(), k.clone(), *corr, *rank));
+        edges.push((query.to_string(), k.clone(), *corr, *rank));
         dfs(k, depth + 1, depth_limit, edges, graph);
     }
 }

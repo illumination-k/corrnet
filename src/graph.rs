@@ -19,7 +19,7 @@ where
 {
     pub fn new(node_name: String) -> Self {
         Self {
-            node_name: node_name,
+            node_name,
             edges: Vec::new(),
         }
     }
@@ -75,7 +75,7 @@ where
         self.node_2
     }
 
-    pub fn node_names<S: ToString>(&self, nodes: &Vec<S>) -> (String, String) {
+    pub fn node_names<S: ToString>(&self, nodes: &[S]) -> (String, String) {
         (
             nodes[self.node_1].to_string(),
             nodes[self.node_2].to_string(),
@@ -87,7 +87,7 @@ impl<T> Edge<T>
 where
     T: Clone + Copy + ToString,
 {
-    pub fn to_record<S: ToString>(&self, nodes: &Vec<S>) -> io::CsvRecord {
+    pub fn to_record<S: ToString>(&self, nodes: &[S]) -> io::CsvRecord {
         let (node_1_name, node_2_name) = self.node_names(nodes);
         io::CsvRecord::new(node_1_name, node_2_name, self.corr, self.rank.to_string())
     }
@@ -106,10 +106,10 @@ impl<T> Graph<T>
 where
     T: Clone + Copy,
 {
-    pub fn new(nodes: &Vec<String>) -> Self {
+    pub fn new<S: ToString>(nodes: &[S]) -> Self {
         Self {
             // edges: Vec::new(),
-            nodes: nodes.iter().map(|x| Node::new(x.clone())).collect(),
+            nodes: nodes.iter().map(|x| Node::new(x.to_string())).collect(),
         }
     }
 
