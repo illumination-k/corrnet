@@ -6,7 +6,7 @@ use std::hash::Hash;
 /// $$ COSMIX(list, ref_list, k) = \sum_{i=1}^{k} n(i, list, ref_list) / \sum_{i=1}^{k} i $$
 /// where n(i, list, ref_list) is the number of elements in the top i element in list
 /// with corresponding elements in the top i elements in ref_list
-pub fn cosmix<T: Hash + Eq + Clone>(list: &[T], ref_list: &[T], k: usize) -> f64 {
+pub fn cosmix<T: Hash + Eq>(list: &[T], ref_list: &[T], k: usize) -> f64 {
     // k should smaller than list.len() or equal
     assert!(k <= list.len());
     // k should also smaller than ref_list.len() or equal
@@ -19,8 +19,8 @@ pub fn cosmix<T: Hash + Eq + Clone>(list: &[T], ref_list: &[T], k: usize) -> f64
     for x in 0..k {
         // let set: HashSet<_> = list.iter().take(x).collect();
         // let ref_set: HashSet<_> = ref_list.iter().take(x).collect();
-        set.insert(list[x].clone());
-        ref_set.insert(ref_list[x].clone());
+        set.insert(&list[x]);
+        ref_set.insert(&ref_list[x]);
         numerator += set.intersection(&ref_set).into_iter().count() as f64;
     }
 

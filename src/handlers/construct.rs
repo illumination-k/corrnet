@@ -44,7 +44,7 @@ pub fn parse_args(
     // calc rank matrix
     info!("calculate rank matrix...");
     let array_size = index.len();
-    let rank_arr: Array2<usize> = rank::construct_rank_matrix(&corr, array_size)?;
+    let rank_arr: Array2<usize> = rank::construct_rank_matrix_multithreading(&corr, array_size)?;
     // construct hrr based network
     info!("construct rank based network...");
 

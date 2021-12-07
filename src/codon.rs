@@ -62,7 +62,7 @@ fn make_codon_corr(seqs: &[String]) -> Result<Array2<f64>> {
 
 pub fn make_codon_rank(seqs: &[String]) -> Result<Array2<usize>> {
     let codon_corr = make_codon_corr(seqs)?;
-    rank::construct_rank_matrix(&codon_corr, seqs.len())
+    rank::construct_rank_matrix_multithreading(&codon_corr, seqs.len())
 }
 
 #[cfg(test)]

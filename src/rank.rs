@@ -1,5 +1,6 @@
 use anyhow::Result;
-use ndarray::{Array2, ArrayBase};
+use itertools::Itertools;
+use ndarray::{parallel::prelude::*, Array2, ArrayBase, Axis};
 use num_traits::Float;
 use ordered_float::OrderedFloat;
 use superslice::*;
@@ -12,6 +13,7 @@ pub fn mr<T: Float>(a: T, b: T) -> T {
     (a * b).sqrt()
 }
 
+#[allow(dead_code)]
 pub fn construct_rank_matrix(corr: &Array2<f64>, size: usize) -> Result<Array2<usize>> {
     let mut rank_vec = vec![];
 
@@ -28,6 +30,31 @@ pub fn construct_rank_matrix(corr: &Array2<f64>, size: usize) -> Result<Array2<u
             rank_vec.push(rank)
         }
     }
+
+    Ok(ArrayBase::from_shape_vec((size, size), rank_vec)?)
+}
+
+pub fn construct_rank_matrix_multithreading(
+    corr: &Array2<f64>,
+    size: usize,
+) -> Result<Array2<usize>> {
+    let mut rank_vec = Vec::new();
+    corr.axis_iter(Axis(0))
+        .into_par_iter()
+        .map(|row| {
+            let sorted_vec = row
+                .iter()
+                .map(|x| OrderedFloat::from(x.abs()))
+                .sorted()
+                .collect_vec();
+
+            row.iter()
+                .map(|x| sorted_vec.len() - sorted_vec.lower_bound(&OrderedFloat::from(*x)) - 1)
+                .collect_vec()
+        })
+        .collect_into_vec(&mut rank_vec);
+
+    let rank_vec = rank_vec.into_iter().flatten().collect_vec();
 
     Ok(ArrayBase::from_shape_vec((size, size), rank_vec)?)
 }
@@ -75,6 +102,10 @@ mod test {
         let rank: Array2<usize> = array![[0, 1, 2], [1, 0, 2], [2, 1, 0]];
 
         assert_eq!(construct_rank_matrix(&arr2, 3).unwrap(), rank);
+        assert_eq!(
+            construct_rank_matrix(&arr2, 3).unwrap(),
+            construct_rank_matrix_multithreading(&arr2, 3).unwrap()
+        );
     }
 
     #[test]
